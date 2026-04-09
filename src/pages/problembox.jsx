@@ -14,7 +14,7 @@ export default function ProblemBoxPage() {
           </svg>
         </div>
         <h2 className="text-xl font-bold text-gray-900">Zero issues reported</h2>
-        <p className="text-gray-500 max-w-sm">Everything looks good! If you spot a problem, click '+' to report it to authorities.</p>
+        <p className="text-gray-500 max-w-sm">Everything looks good! If you spot a problem, click &apos;+&apos; to report it to authorities.</p>
       </div>
     </ModuleLayout>
   );
