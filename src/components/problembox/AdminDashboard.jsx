@@ -46,10 +46,10 @@ export default function AdminDashboard() {
                 <ShieldAlert className="text-white" size={32} />
                 <div className="text-white">
                   <h4 className="font-black uppercase tracking-widest text-sm">⚠️ CRITICAL ALERT: AUTO-ESCALATED</h4>
-                  <p className="text-[10px] font-black opacity-80 uppercase tracking-[0.2em]">New ticket mentions "core switch failure" / "flooding" — response required immediately.</p>
+                  <p className="text-[10px] font-black opacity-80 uppercase tracking-[0.2em]">New ticket mentions &quot;core switch failure&quot; / &quot;flooding&quot; — response required immediately.</p>
                 </div>
               </div>
-              <div className="bg-white/20 px-4 py-2 rounded-xl text-white font-black text-[10px] uppercase tracking-widest">View Ticket →</div>
+              <div className="bg-white/20 px-4 py-2 rounded-xl text-white font-black text-[10px] uppercase tracking-widest">View Ticket &rarr;</div>
             </div>
           </motion.div>
         )}

@@ -4,7 +4,7 @@ import { ThemeContext } from '@/pages/_app';
 import { Sun, Moon, LogOut, User, Phone, BookOpen, School, Hash, Mail, Settings } from 'lucide-react';
 import EditProfileModal from './EditProfileModal';
 
-export default function Navbar() {
+export default function Navbar({ isDark = false }) {
   const router = useRouter();
   const { isDarkMode, toggleTheme, isLoggedIn, logout, userProfile } = useContext(ThemeContext);
   const [showProfileCard, setShowProfileCard] = useState(false);
@@ -12,14 +12,18 @@ export default function Navbar() {
 
   return (
     <>
-    <nav className="sticky top-0 z-50 w-full bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 transition-colors duration-500">
+    <nav className={`sticky top-0 z-50 w-full transition-colors duration-500 backdrop-blur-xl border-b ${
+      isDark 
+      ? 'bg-[#0f0f12]/40 border-white/5' 
+      : 'bg-white/60 dark:bg-slate-950/60 border-gray-100 dark:border-white/5'
+    }`}>
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div 
           onClick={() => router.push('/')}
           className="font-syne font-black text-2xl tracking-tighter cursor-pointer group"
         >
-          <span className="text-[#1A56DB] dark:text-blue-400 group-hover:text-blue-700 transition-colors">CAMPUS</span>
-          <span className="text-gray-900 dark:text-white transition-colors">buddy</span>
+          <span className={`${isDark ? 'text-white' : 'text-[#1A56DB] dark:text-blue-400'} group-hover:text-blue-700 transition-colors`}>CAMPUS</span>
+          <span className={`${isDark ? 'text-white/60' : 'text-gray-900 dark:text-white'} transition-colors`}>buddy</span>
         </div>
         
         <div className="flex items-center gap-4">
@@ -37,9 +41,15 @@ export default function Navbar() {
              <div className="relative">
                <button 
                  onClick={() => setShowProfileCard(!showProfileCard)}
-                 className={`flex items-center gap-2 p-1.5 pr-4 rounded-2xl transition-all duration-300 ${showProfileCard ? 'bg-[#1A56DB] text-white shadow-lg shadow-blue-500/20' : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200 hover:brightness-110'}`}
+                 className={`flex items-center gap-2 p-1.5 pr-4 rounded-2xl transition-all duration-300 ${
+                   showProfileCard 
+                   ? 'bg-[#1A56DB] text-white shadow-lg shadow-blue-500/20' 
+                   : isDark 
+                     ? 'bg-slate-900 border border-white/20 text-white hover:bg-slate-800'
+                     : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200 hover:brightness-110'
+                 }`}
                >
-                 <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-black">
+                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black ${isDark ? 'bg-white/10' : 'bg-white/20'}`}>
                    {userProfile?.name?.charAt(0) || 'U'}
                  </div>
                  <span className="text-sm font-bold hidden md:block">Profile</span>

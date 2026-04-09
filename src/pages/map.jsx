@@ -5,7 +5,7 @@ import BuildingBottomSheet from '@/components/map/BuildingBottomSheet';
 import { BUILDINGS, MARKERS, FRIEND_LOCATIONS } from '@/data/mapData';
 import { useArena } from '@/context/ArenaContext';
 import { useCaffinity } from '@/context/CaffinityContext';
-import { Search, Layers, Navigation2, Scan } from 'lucide-react';
+import { Search, Layers, Navigation2, Scan, Zap, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MapPage() {

@@ -4,6 +4,11 @@ import '../styles/globals.css';
 import { CaffinityProvider } from '@/context/CaffinityContext';
 import { ArenaProvider } from '@/context/ArenaContext';
 import { ProblemBoxProvider } from '@/context/ProblemBoxContext';
+import { UAssistProvider } from '@/context/UAssistContext';
+import { ShopperzProvider } from '@/context/ShopperzContext';
+import UAssistFab from '@/components/uassist/UAssistFab';
+import UAssistOverlay from '@/components/uassist/UAssistOverlay';
+import { AnimatePresence } from 'framer-motion';
 
 const syne = Syne({ 
   subsets: ['latin'],
@@ -98,9 +103,17 @@ export default function App({ Component, pageProps }) {
       <CaffinityProvider>
         <ArenaProvider>
           <ProblemBoxProvider>
-            <div className={`${syne.variable} ${inter.variable} font-inter antialiased transition-colors duration-500 min-h-screen bg-white dark:bg-[#020617] text-[#0F172A] dark:text-white`}>
-              <Component {...pageProps} />
-            </div>
+            <ShopperzProvider>
+              <UAssistProvider>
+                <div className={`${syne.variable} ${inter.variable} font-inter antialiased transition-colors duration-500 min-h-screen bg-white dark:bg-[#020617] text-[#0F172A] dark:text-white`}>
+                  <Component {...pageProps} />
+                  <UAssistFab />
+                  <AnimatePresence>
+                    <UAssistOverlay />
+                  </AnimatePresence>
+                </div>
+              </UAssistProvider>
+            </ShopperzProvider>
           </ProblemBoxProvider>
         </ArenaProvider>
       </CaffinityProvider>

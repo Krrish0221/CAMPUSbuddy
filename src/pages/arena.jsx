@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import ModuleLayout from '@/components/ModuleLayout';
 import {
   Calendar,
@@ -215,7 +216,14 @@ function ArenaContent() {
                       onClick={() => setSelectedEvent(event)}
                       className="group relative bg-white dark:bg-slate-900 rounded-[45px] border-4 border-slate-50 dark:border-white/5 overflow-hidden hover:shadow-2xl transition-all duration-500 h-[340px] cursor-pointer"
                     >
-                      <img src={event.coverImage} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={event.title} />
+                      <div className="absolute inset-0 w-full h-full group-hover:scale-110 transition-transform duration-1000">
+                        <Image 
+                          src={event.coverImage} 
+                          alt={event.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent p-10 flex flex-col justify-end">
                         {isLive && (
                           <div className="absolute top-8 left-8 flex items-center gap-2 bg-red-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse border-4 border-white/20">
@@ -279,8 +287,13 @@ function ArenaContent() {
                     filteredTeammates.map(student => (
                       <div key={student.id} className="flex-shrink-0 w-80 bg-white dark:bg-[#1a1a2e] border-2 border-slate-100 dark:border-white/5 rounded-[40px] p-8 shadow-2xl snap-center hover:border-amber-500/50 transition-all group/card relative overflow-hidden">
                         <div className="flex items-center justify-between mb-6">
-                          <div className="relative">
-                            <img src={student.avatar} className="w-16 h-16 rounded-3xl object-cover border-4 border-slate-100 dark:border-slate-900" alt={student.name} />
+                          <div className="relative w-16 h-16 rounded-3xl overflow-hidden border-4 border-slate-100 dark:border-slate-900 shadow-xl">
+                            <Image 
+                              src={student.avatar} 
+                              alt={student.name}
+                              fill
+                              className="object-cover"
+                            />
                           </div>
                           <button className="px-6 py-2 border-2 border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-90">
                             + Connect

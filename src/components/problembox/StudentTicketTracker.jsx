@@ -83,7 +83,7 @@ export default function StudentTicketTracker({ ticket }) {
                <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase italic">🤖 UAssist Summary</h3>
              </div>
              <p className="text-sm font-bold text-slate-500 leading-relaxed italic">
-               "{ticket.aiSummary}"
+               &quot;{ticket.aiSummary}&quot;
              </p>
            </div>
 
@@ -136,7 +136,7 @@ export default function StudentTicketTracker({ ticket }) {
                </div>
                <div className="space-y-2">
                  <h4 className="text-2xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">Fixed by Network Operations</h4>
-                 <p className="text-sm font-bold text-slate-500 italic">"Router reset, connectivity restored."</p>
+                 <p className="text-sm font-bold text-slate-500 italic">&quot;Router reset, connectivity restored.&quot;</p>
                  <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Resolved in: 3 hours 20 mins</p>
                </div>
                

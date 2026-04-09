@@ -133,7 +133,7 @@ export default function ProblemBoxPage() {
                     onClick={() => setSelectedTicket(null)}
                     className="mb-8 flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-slate-900 dark:hover:text-white uppercase tracking-widest"
                   >
-                    ← Back to Issues
+                    &larr; Back to Issues
                   </button>
                   <StudentTicketTracker ticket={selectedTicket} />
                 </motion.div>
@@ -226,7 +226,7 @@ export default function ProblemBoxPage() {
                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] italic">Authority Resolution</p>
                          </div>
                          <p className="text-sm font-bold text-slate-500 leading-relaxed italic">
-                           "{ticket.resolution?.desc || ticket.description}"
+                           &quot;{ticket.resolution?.desc || ticket.description}&quot;
                          </p>
                          <div className="pt-4 flex items-center justify-between border-t border-slate-50 dark:border-white/5">
                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Solved By: {ticket.resolution?.solvedBy}</p>
@@ -274,7 +274,7 @@ export default function ProblemBoxPage() {
                          className="bg-white dark:bg-slate-900 p-8 rounded-[40px] shadow-lg border border-slate-100 dark:border-white/5 flex items-center justify-between"
                        >
                          <div className="space-y-1">
-                           <p className="text-sm font-bold text-slate-700 dark:text-white leading-tight">"{s.text}"</p>
+                           <p className="text-sm font-bold text-slate-700 dark:text-white leading-tight">&quot;{s.text}&quot;</p>
                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{s.time} • Anonymous</p>
                          </div>
                          <div className="flex items-center gap-3">
@@ -374,7 +374,7 @@ export default function ProblemBoxPage() {
                 </div>
                 
                 <p className="text-[10px] font-bold text-slate-500 leading-relaxed italic">
-                  "Unwanted or self-created problems will be considered <span className="text-red-500 underline decoration-2 underline-offset-4">acts of violation</span>. Strict disciplinary action will be taken. Report safely."
+                  &quot;Unwanted or self-created problems will be considered <span className="text-red-500 underline decoration-2 underline-offset-4">acts of violation</span>. Strict disciplinary action will be taken. Report safely.&quot;
                 </p>
 
                 <div className="pt-2 flex items-center justify-between border-t border-amber-500/10">

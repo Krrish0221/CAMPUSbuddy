@@ -54,11 +54,14 @@ export default function CaffinityVendorDashboard() {
                 onClick={() => selectCanteen(canteen)}
                 className="group relative h-48 rounded-[40px] overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-500 border-2 border-transparent hover:border-blue-600"
               >
-                <img 
-                  src={canteen.image} 
-                  className="absolute inset-0 w-full h-full object-cover transition duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-100" 
-                  alt={canteen.name}
-                />
+                <div className="absolute inset-0 w-full h-full transition duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-100">
+                  <Image 
+                    src={canteen.image} 
+                    alt={canteen.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/40 to-transparent flex items-center p-10">
                   <div className="flex-1">
                     <h3 className="text-3xl font-black text-white tracking-tight uppercase italic">{canteen.name}</h3>
