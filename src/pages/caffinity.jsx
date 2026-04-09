@@ -254,10 +254,10 @@ export default function CaffinityPage() {
 
         {specialItem && (
           <div className={`relative h-60 rounded-[40px] overflow-hidden group shadow-2xl border-4 border-white transition-transform duration-500 ${isCartOpen ? 'scale-100 pointer-events-none' : ''}`}>
-            <img src={specialItem.image} className={`w-full h-full object-cover transition duration-1000 ${isCartOpen ? '' : 'group-hover:scale-105'}`} alt="Special" />
+            <img src={specialItem.image} className={`w-full h-full object-cover transition duration-1000 ${isCartOpen ? '' : 'group-hover:scale-105'}`} alt={specialItem.name} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex items-end p-8">
               <div className="space-y-2">
-                <span className="bg-yellow-400 text-gray-900 text-[9px] font-black uppercase px-4 py-1.5 rounded-full tracking-widest shadow-lg">Chef's Recommendation</span>
+                <span className="bg-yellow-400 text-gray-900 text-[9px] font-black uppercase px-4 py-1.5 rounded-full tracking-widest shadow-lg">Chef&apos;s Recommendation</span>
                 <h2 className="text-3xl md:text-4xl font-black text-white font-syne tracking-tighter leading-none">{specialItem.name} 🔥</h2>
                 <button onClick={() => addToCart(specialItem)} className="mt-3 px-6 py-2.5 bg-white text-gray-900 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all active:scale-95 shadow-xl">Add to Cart — ₹{specialItem.price}</button>
               </div>
@@ -279,7 +279,7 @@ export default function CaffinityPage() {
           {filteredItems.map(item => (
             <div key={item.id} className={`group flex flex-col bg-white rounded-[35px] border-2 border-gray-50 overflow-hidden hover:shadow-2xl transition-all duration-500 ${!item.inStock ? 'grayscale opacity-70' : ''}`}>
               <div className="relative h-44 overflow-hidden">
-                <img src={item.image} className="w-full h-full object-cover transition duration-700 group-hover:scale-110" />
+                <img src={item.image} className="w-full h-full object-cover transition duration-700 group-hover:scale-110" alt={item.name} />
                 <div className="absolute top-3 left-3 bg-white/95 px-3 py-1.5 rounded-xl flex items-center gap-2 border border-gray-100 shadow-sm"><Clock size={12} className="text-blue-600" /><span className="text-[10px] font-black text-gray-800 uppercase tracking-tighter">{item.prepTime}</span></div>
               </div>
               <div className="p-5 flex-1 flex flex-col">
@@ -339,7 +339,7 @@ export default function CaffinityPage() {
             <div className="flex-1 overflow-y-auto px-10 py-2 space-y-4 scrollbar-none">
               {cart.map(item => (
                 <div key={item.id} className="flex items-center gap-4 group">
-                  <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md border-2 border-white shrink-0"><img src={item.image} className="w-full h-full object-cover" /></div>
+                  <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md border-2 border-white shrink-0"><img src={item.image} className="w-full h-full object-cover" alt={item.name} /></div>
                   <div className="flex-1 min-w-0"><h4 className="font-black text-gray-900 text-sm truncate uppercase italic tracking-tight">{item.name}</h4><p className="text-blue-600 font-black tracking-tighter text-xs">₹{item.price}</p></div>
                   <div className="flex items-center bg-gray-50 rounded-xl p-1 gap-2 border border-gray-100"><button onClick={() => updateQuantity(item.id, -1)} className="w-6 h-6 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-400 hover:text-red-500 transition"><Minus size={12} /></button><span className="w-4 text-center font-black text-xs text-gray-900">{item.quantity}</span><button onClick={() => updateQuantity(item.id, 1)} className="w-6 h-6 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-400 hover:text-blue-600 transition"><Plus size={12} /></button></div>
                 </div>

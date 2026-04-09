@@ -252,7 +252,7 @@ function OrderCard({ order, onAction, btnText, color }) {
       {order.specialNote && (
           <div className="p-3 bg-red-50 rounded-xl border border-red-100">
             <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1 italic">Note:</p>
-            <p className="text-xs text-red-800 font-medium italic">"{order.specialNote}"</p>
+            <p className="text-xs text-red-800 font-medium italic">&quot;{order.specialNote}&quot;</p>
           </div>
       )}
 
