@@ -1,6 +1,7 @@
 import { Syne, Inter } from 'next/font/google';
 import { useEffect, useState, createContext } from 'react';
 import '../styles/globals.css';
+import { CaffinityProvider } from '@/context/CaffinityContext';
 
 const syne = Syne({ 
   subsets: ['latin'],
@@ -92,9 +93,11 @@ export default function App({ Component, pageProps }) {
       isLoggedIn, login, logout,
       userProfile, updateProfile 
     }}>
-      <div className={`${syne.variable} ${inter.variable} font-inter antialiased transition-colors duration-500 min-h-screen bg-white dark:bg-[#020617] text-[#0F172A] dark:text-white`}>
-        <Component {...pageProps} />
-      </div>
+      <CaffinityProvider>
+        <div className={`${syne.variable} ${inter.variable} font-inter antialiased transition-colors duration-500 min-h-screen bg-white dark:bg-[#020617] text-[#0F172A] dark:text-white`}>
+          <Component {...pageProps} />
+        </div>
+      </CaffinityProvider>
     </ThemeContext.Provider>
   );
 }
