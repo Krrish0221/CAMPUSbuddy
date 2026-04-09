@@ -1,20 +1,152 @@
+import { useState } from 'react';
 import ModuleLayout from '@/components/ModuleLayout';
+import CampusMap from '@/components/map/CampusMap';
+import BuildingBottomSheet from '@/components/map/BuildingBottomSheet';
+import { BUILDINGS, MARKERS, FRIEND_LOCATIONS } from '@/data/mapData';
+import { useArena } from '@/context/ArenaContext';
+import { useCaffinity } from '@/context/CaffinityContext';
+import { Search, Layers, Navigation2, Scan } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MapPage() {
+  const { activeTab, setActiveTab } = useArena(); // Reuse for tab state if needed
+  const { orders } = useCaffinity();
+  
+  const [selectedBuilding, setSelectedBuilding] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeLayers, setActiveLayers] = useState(['buildings', 'friends', 'events', 'canteen']);
+  const [showLayerMenu, setShowLayerMenu] = useState(false);
+
+  // Dynamic Canteen Status based on Orders
+  const canteenMarkers = MARKERS.map(m => {
+    if (m.type === 'cafeteria') {
+      const activeOrders = orders.filter(o => o.status !== 'Done').length;
+      return {
+        ...m,
+        status: activeOrders > 20 ? 'high-traffic' : activeOrders > 10 ? 'busy' : 'available',
+        pulseColor: activeOrders > 20 ? 'red' : activeOrders > 10 ? 'orange' : 'green'
+      };
+    }
+    return m;
+  });
+
+  const toggleLayer = (layer) => {
+    setActiveLayers(prev => 
+      prev.includes(layer) ? prev.filter(l => l !== layer) : [...prev, layer]
+    );
+  };
+
   return (
     <ModuleLayout 
-      title="Mapping" 
-      subtitle="Campus navigation & room finder" 
-      color="#0F6E56"
+      title="Campus OS Map" 
+      subtitle="Interact with 3D buildings and live markers" 
+      color="#3b82f6"
     >
-      <div className="flex flex-col items-center justify-center text-center py-20 space-y-4">
-        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-          </svg>
+      <div className="relative h-[calc(100vh-200px)] w-full overflow-hidden rounded-[40px] bg-slate-900 border-4 border-slate-800 shadow-inner">
+        
+        {/* TOP OVERLAY - SEARCH & LAYERS */}
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 w-full max-w-xl z-50 px-6 flex gap-3">
+          <div className="relative flex-1 group">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" size={20} />
+            <input 
+              type="text" 
+              placeholder="Search rooms, labs, blocks..." 
+              className="w-full pl-16 pr-6 py-4 bg-slate-900/80 backdrop-blur-xl border-2 border-white/5 rounded-3xl text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 shadow-2xl placeholder:text-slate-600"
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="relative">
+            <button 
+              onClick={() => setShowLayerMenu(!showLayerMenu)}
+              className={`h-14 w-14 rounded-3xl flex items-center justify-center transition-all border-2 ${
+                showLayerMenu ? 'bg-blue-600 border-blue-400 text-white' : 'bg-slate-900/80 border-white/5 text-slate-400 backdrop-blur-xl'
+              }`}
+            >
+              <Layers size={22} />
+            </button>
+
+            <AnimatePresence>
+              {showLayerMenu && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                  className="absolute top-full right-0 mt-3 w-64 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-[30px] p-6 shadow-2xl z-50 space-y-4"
+                >
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">Map Layers</p>
+                  <div className="space-y-2">
+                    {[
+                      { id: 'buildings', label: 'Buildings', icon: <Scan size={14} />, color: 'blue' },
+                      { id: 'canteen', label: 'Canteen Traffic', icon: <Navigation2 size={14} />, color: 'green' },
+                      { id: 'events', label: 'Live Events', icon: <Zap size={14} />, color: 'orange' },
+                      { id: 'friends', label: 'Friends', icon: <Users size={14} />, color: 'purple' }
+                    ].map(layer => (
+                      <button 
+                        key={layer.id}
+                        onClick={() => toggleLayer(layer.id)}
+                        className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all ${
+                          activeLayers.includes(layer.id) ? 'bg-white/5 text-white' : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={activeLayers.includes(layer.id) ? `text-${layer.color}-500` : ''}>{layer.icon}</span>
+                          <span className="text-xs font-bold">{layer.label}</span>
+                        </div>
+                        <div className={`w-8 h-4 rounded-full relative transition-colors ${activeLayers.includes(layer.id) ? 'bg-blue-600' : 'bg-slate-800'}`}>
+                          <div className={`absolute top-1 w-2 h-2 bg-white rounded-full transition-all ${activeLayers.includes(layer.id) ? 'left-5' : 'left-1'}`} />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-        <h2 className="text-xl font-bold text-gray-900">Map loading...</h2>
-        <p className="text-gray-500 max-w-sm">Wait a moment while we load the interactive campus floor plans.</p>
+
+        {/* MAP COMPONENT */}
+        <div className="w-full h-full cursor-grab active:cursor-grabbing overflow-auto custom-scrollbar">
+           <CampusMap 
+             buildings={activeLayers.includes('buildings') ? BUILDINGS : []}
+             markers={canteenMarkers.filter(m => 
+                (m.type === 'cafeteria' && activeLayers.includes('canteen')) ||
+                (m.type === 'event' && activeLayers.includes('events')) ||
+                (m.type === 'shop') ||
+                (m.type === 'problem')
+             )}
+             friends={activeLayers.includes('friends') ? FRIEND_LOCATIONS : []}
+             onBuildingClick={setSelectedBuilding}
+             activeLayer={activeLayers.includes('friends') ? 'friends' : 'all'}
+           />
+        </div>
+
+        {/* BOTTOM SHEET */}
+        <AnimatePresence>
+          {selectedBuilding && (
+            <>
+              {/* Backdrop */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSelectedBuilding(null)}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm z-[90]"
+              />
+              <BuildingBottomSheet 
+                building={selectedBuilding} 
+                onClose={() => setSelectedBuilding(null)} 
+              />
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* CONTROLS OVERLAY - RIGHT SIDE */}
+        <div className="absolute bottom-10 right-10 z-[80] flex flex-col gap-3">
+           <button className="w-14 h-14 bg-white text-slate-900 rounded-3xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all">
+             <Navigation2 size={24} fill="currentColor" />
+           </button>
+        </div>
       </div>
     </ModuleLayout>
   );
