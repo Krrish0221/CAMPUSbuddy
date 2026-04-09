@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #020617;
+}
+
+.dark:root {
+  --background: #020617;
+  --foreground: #ffffff;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  overflow-x: hidden;
+  transition: background-color 0.5s ease;
+}
+
+/* 1. GRIDS */
+.dot-grid {
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.dark .dot-grid {
+  background-image: radial-gradient(#1e293b 1px, transparent 1px);
+}
+
+.glowing-grid {
+  background: 
+    linear-gradient(90deg, rgba(30, 41, 59, 0.1) 1px, transparent 1px),
+    linear-gradient(rgba(30, 41, 59, 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* 2. TYPEWRITER & CURSOR */
+.typewriter-cursor::after {
+  content: '|';
+  animation: blink 0.7s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 3. SHINE & GLOW */
+@keyframes shine-sweep {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+.animate-shine-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shine-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shine-sweep 3s infinite;
+}
+
+/* 4. GLASSMORPHISM */
+.glass-card {
+  @apply backdrop-blur-md bg-white/40 border border-white/20 shadow-xl;
+}
+
+.dark .glass-card {
+  @apply bg-slate-900/40 border-slate-700/30;
+}
+
+/* 5. MARQUEE */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+/* 6. FLOATING PARTICLES */
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-20px) translateX(10px); }
+}
+
+.particle {
+  @apply absolute rounded-full bg-blue-400/20 blur-sm pointer-events-none;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* 7. MESH DRIFT */
+@keyframes mesh-drift-1 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1.0); }
+  33% { transform: translate(15%, 20%) rotate(120deg) scale(1.4); }
+  100% { transform: translate(0, 0) rotate(360deg) scale(1.0); }
+}
+
+.animate-mesh-1 { animation: mesh-drift-1 20s infinite linear; }
