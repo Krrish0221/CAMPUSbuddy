@@ -17,10 +17,10 @@ export default function Navbar({ isDark = false }) {
       ? 'bg-[#0f0f12]/40 border-white/5' 
       : 'bg-white/60 dark:bg-slate-950/60 border-gray-100 dark:border-white/5'
     }`}>
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         <div 
           onClick={() => router.push('/')}
-          className="font-syne font-black text-2xl tracking-tighter cursor-pointer group"
+          className="font-syne font-black text-xl md:text-2xl tracking-tighter cursor-pointer group"
         >
           <span className={`${isDark ? 'text-white' : 'text-[#1A56DB] dark:text-blue-400'} group-hover:text-blue-700 transition-colors`}>CAMPUS</span>
           <span className={`${isDark ? 'text-white/60' : 'text-gray-900 dark:text-white'} transition-colors`}>buddy</span>
@@ -113,7 +113,7 @@ export default function Navbar({ isDark = false }) {
           ) : (
             <button 
               onClick={() => router.push('/login')}
-              className="border-[1.5px] border-[#1A56DB] dark:border-blue-400 text-[#1A56DB] dark:text-blue-400 px-6 py-2 rounded-full text-sm font-bold hover:bg-[#1A56DB] dark:hover:bg-blue-400 hover:text-white dark:hover:text-[#020617] transition-all duration-300 shadow-lg shadow-blue-500/5"
+              className="border-[1.5px] border-[#1A56DB] dark:border-blue-400 text-[#1A56DB] dark:text-blue-400 px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[10px] md:text-sm font-bold hover:bg-[#1A56DB] dark:hover:bg-blue-400 hover:text-white dark:hover:text-[#020617] transition-all duration-300 shadow-lg shadow-blue-500/5 whitespace-nowrap"
             >
               Login
             </button>

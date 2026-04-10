@@ -28,6 +28,23 @@ export const CaffinityProvider = ({ children }) => {
     });
   };
 
+  const addMenuItem = (item) => {
+    setMenuItems(prev => {
+      const newItem = { ...item, id: `m${Date.now()}` };
+      const updated = [newItem, ...prev];
+      localStorage.setItem('caffinity_menu', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const updateMenuItem = (id, updates) => {
+    setMenuItems(prev => {
+      const updated = prev.map(i => i.id === id ? { ...i, ...updates } : i);
+      localStorage.setItem('caffinity_menu', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const deleteMenuItem = (id) => {
     setMenuItems(prev => {
       const updated = prev.filter(i => i.id !== id);
@@ -176,7 +193,9 @@ export const CaffinityProvider = ({ children }) => {
     updateOrderStatus,
     menuItems,
     toggleMenuItemAvailability,
-    deleteMenuItem
+    deleteMenuItem,
+    addMenuItem,
+    updateMenuItem
   };
 
   return (

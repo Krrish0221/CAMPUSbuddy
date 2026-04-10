@@ -26,6 +26,9 @@ export default function ShopperzAdminPage() {
   const { products, addProduct, updateProduct, deleteProduct } = useShopperz();
   const [activeTab, setActiveTab] = useState('Inventory Matrix');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', price: '', category: '', stockCount: 10, image: '', isAvailable: true });
 
   const filteredInventory = products.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -41,6 +44,27 @@ export default function ShopperzAdminPage() {
 
   const deleteItem = (id) => {
     deleteProduct(id);
+  };
+
+  const handleEditClick = (product) => {
+    setEditingProduct(product);
+    setEditForm({ 
+      name: product.name, 
+      price: product.price, 
+      category: product.category, 
+      stockCount: product.stockCount, 
+      image: product.image,
+      isAvailable: product.isAvailable
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateProduct = () => {
+    if (editingProduct) {
+      updateProduct(editingProduct.id, editForm);
+      setShowEditModal(false);
+      setEditingProduct(null);
+    }
   };
   
   const handleAddNewItem = () => {
@@ -162,7 +186,10 @@ export default function ShopperzAdminPage() {
                           </td>
                           <td className="p-6 text-right">
                             <div className="flex items-center justify-end gap-2">
-                               <button className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors">
+                               <button 
+                                onClick={() => handleEditClick(item)}
+                                className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"
+                               >
                                  <Edit2 size={16} />
                                </button>
                                <button onClick={() => deleteItem(item.id)} className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
@@ -223,6 +250,67 @@ export default function ShopperzAdminPage() {
             </motion.div>
           )}
 
+        </AnimatePresence>
+
+        {/* EDIT MODAL */}
+        <AnimatePresence>
+          {showEditModal && (
+            <div className="fixed inset-0 z-[100] bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl flex items-center justify-center p-6">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+                className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 shadow-2xl rounded-[50px] overflow-hidden"
+              >
+                <div className="h-2 bg-orange-500" />
+                <div className="p-10 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-3xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Edit Product</h3>
+                    <button onClick={() => setShowEditModal(false)} className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                      <Plus size={24} className="rotate-45" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-4">Product Name</label>
+                      <input 
+                        type="text" 
+                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold outline-none focus:border-orange-500" 
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-4">Price (₹)</label>
+                        <input 
+                          type="number" 
+                          className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold outline-none focus:border-orange-500" 
+                          value={editForm.price}
+                          onChange={(e) => setEditForm({...editForm, price: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-4">Stock</label>
+                        <input 
+                          type="number" 
+                          className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold outline-none focus:border-orange-500" 
+                          value={editForm.stockCount}
+                          onChange={(e) => setEditForm({...editForm, stockCount: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={handleUpdateProduct}
+                    className="w-full py-5 bg-orange-500 text-white rounded-[25px] font-black text-xs uppercase tracking-widest hover:bg-orange-600 shadow-xl shadow-orange-500/20 transition-all"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
         </AnimatePresence>
       </div>
     </AdminLayout>

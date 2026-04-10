@@ -14,17 +14,17 @@ export function ArenaProvider({ children }) {
   const [incomingSyncRequest, setIncomingSyncRequest] = useState(null);
   const [arenaEvents, setArenaEvents] = useState(EVENTS || []);
 
-  const addEvent = (newEvent) => {
+  const addEvent = useCallback((newEvent) => {
     setArenaEvents(prev => [{ ...newEvent, id: `EVT-${Math.floor(Math.random() * 9000) + 1000}` }, ...prev]);
-  };
+  }, []);
 
-  const updateEvent = (id, updatedEvent) => {
+  const updateEvent = useCallback((id, updatedEvent) => {
     setArenaEvents(prev => prev.map(ev => ev.id === id ? { ...ev, ...updatedEvent } : ev));
-  };
+  }, []);
 
-  const deleteEvent = (id) => {
+  const deleteEvent = useCallback((id) => {
     setArenaEvents(prev => prev.filter(ev => ev.id !== id));
-  };
+  }, []);
 
   // Simulate an incoming sync request after 10s for demo
   useEffect(() => {
@@ -39,54 +39,58 @@ export function ArenaProvider({ children }) {
     return () => clearTimeout(timer);
   }, []);
 
-  const rsvpToEvent = (event) => {
-    if (registrations.some(r => r.eventId === event.id)) return;
-    
-    const newReg = {
-      id: `REG-${Math.floor(Math.random() * 9000) + 1000}`,
-      eventId: event.id,
-      userId: 'u1',
-      studentName: 'Rohan Sharma',
-      registeredAt: new Date().toISOString(),
-      status: 'Confirmed'
-    };
-    
-    setRegistrations(prev => [...prev, newReg]);
-    return newReg;
-  };
+  const rsvpToEvent = useCallback((event) => {
+    setRegistrations(prev => {
+      if (prev.some(r => r.eventId === event.id)) return prev;
+      
+      const newReg = {
+        id: `REG-${Math.floor(Math.random() * 9000) + 1000}`,
+        eventId: event.id,
+        userId: 'u1',
+        studentName: 'Rohan Sharma',
+        registeredAt: new Date().toISOString(),
+        status: 'Confirmed'
+      };
+      return [...prev, newReg];
+    });
+  }, []);
 
-  const acceptSyncRequest = () => {
+  const acceptSyncRequest = useCallback(() => {
     if (incomingSyncRequest) {
       rsvpToEvent(incomingSyncRequest.event);
       setIncomingSyncRequest(null);
       
-      const notif = {
-        id: Date.now(),
-        type: 'incoming',
-        message: `Sync confirmed! You and Krish are now a Duo for CodePulse. 🚀`,
-        time: 'Just now'
-      };
-      setNotifications(prev => [notif, ...prev]);
-      setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== notif.id)), 5000);
+      setNotifications(prev => {
+        const notif = {
+          id: Date.now(),
+          type: 'incoming',
+          message: `Sync confirmed! You and Krish are now a Duo for CodePulse. 🚀`,
+          time: 'Just now'
+        };
+        return [notif, ...prev];
+      });
     }
-  };
+  }, [incomingSyncRequest, rsvpToEvent]);
 
-  const declineSyncRequest = () => setIncomingSyncRequest(null);
+  const declineSyncRequest = useCallback(() => setIncomingSyncRequest(null), []);
 
-  const sendTeamRequest = (friend, eventTitle) => {
-    if (sentRequests.includes(friend.id)) return;
-    
-    setSentRequests(prev => [...prev, friend.id]);
+  const sendTeamRequest = useCallback((friend, eventTitle) => {
+    setSentRequests(prev => {
+      if (prev.includes(friend.id)) return prev;
+      return [...prev, friend.id];
+    });
     
     const outgoingId = Date.now();
     // Simulate Outgoing Notification
-    const outgoingNotif = {
-      id: outgoingId,
-      type: 'outgoing',
-      message: `Request sent to ${friend.name}'s device! 📱`,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    setNotifications(prev => [outgoingNotif, ...prev]);
+    setNotifications(prev => {
+      const outgoingNotif = {
+        id: outgoingId,
+        type: 'outgoing',
+        message: `Request sent to ${friend.name}'s device! 📱`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      return [outgoingNotif, ...prev];
+    });
 
     // Auto-remove outgoing after 5s
     setTimeout(() => {
@@ -96,43 +100,50 @@ export function ArenaProvider({ children }) {
     // Simulate Incoming Notification on "Friend's Device" (Mock)
     setTimeout(() => {
       const incomingId = Date.now() + 1;
-      const incomingNotif = {
-        id: incomingId,
-        type: 'incoming',
-        message: `${friend.name} received your request for ${eventTitle}!`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setNotifications(prev => [incomingNotif, ...prev]);
+      setNotifications(prev => {
+        const incomingNotif = {
+          id: incomingId,
+          type: 'incoming',
+          message: `${friend.name} received your request for ${eventTitle}!`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        return [incomingNotif, ...prev];
+      });
 
       // Auto-remove incoming after 5s
       setTimeout(() => {
         setNotifications(prev => prev.filter(n => n.id !== incomingId));
       }, 5000);
     }, 2000);
-  };
+  }, []);
 
-  const acceptNetworkRequest = (requestId) => {
-    const request = pendingNetworkRequests.find(r => r.id === requestId);
-    if (request) {
-      setConnections(prev => [...prev, request]);
-      setPendingNetworkRequests(prev => prev.filter(r => r.id !== requestId));
-      
-      const notif = {
-        id: Date.now(),
-        type: 'incoming',
-        message: `You are now connected with ${request.name}! 🤝`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setNotifications(prev => [notif, ...prev]);
-      setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== notif.id)), 5000);
-    }
-  };
+  const acceptNetworkRequest = useCallback((requestId) => {
+    setPendingNetworkRequests(prev => {
+      const request = prev.find(r => r.id === requestId);
+      if (request) {
+        setConnections(conn => [...conn, request]);
+        
+        setNotifications(notifs => {
+          const notif = {
+            id: Date.now(),
+            type: 'incoming',
+            message: `You are now connected with ${request.name}! 🤝`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          return [notif, ...notifs];
+        });
+        
+        return prev.filter(r => r.id !== requestId);
+      }
+      return prev;
+    });
+  }, []);
 
-  const declineNetworkRequest = (requestId) => {
+  const declineNetworkRequest = useCallback((requestId) => {
     setPendingNetworkRequests(prev => prev.filter(r => r.id !== requestId));
-  };
+  }, []);
 
-  const clearNotifications = () => setNotifications([]);
+  const clearNotifications = useCallback(() => setNotifications([]), []);
 
   const value = useMemo(() => ({
     registrations,
@@ -159,7 +170,10 @@ export function ArenaProvider({ children }) {
     deleteEvent
   }), [
     registrations, sentRequests, activeTeamTier, notifications, activeTab, 
-    pendingNetworkRequests, connections, incomingSyncRequest, arenaEvents
+    pendingNetworkRequests, connections, incomingSyncRequest, arenaEvents,
+    rsvpToEvent, sendTeamRequest, acceptNetworkRequest, declineNetworkRequest,
+    acceptSyncRequest, declineSyncRequest, clearNotifications, addEvent,
+    updateEvent, deleteEvent
   ]);
 
   return (

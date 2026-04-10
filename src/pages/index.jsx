@@ -126,7 +126,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#020617]">
+    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#020617] overflow-x-hidden">
       <Navbar />
 
       {/* BACKGROUND EFFECTS */}
@@ -140,7 +140,7 @@ export default function LandingPage() {
       {/* 2. HERO SECTION */}
       <section className="w-full text-center pt-24 md:pt-40 pb-16 px-6 max-w-5xl mx-auto">
         <div className="transition-all duration-1000 ease-out transform">
-           <h1 className="font-syne font-black text-5xl md:text-7xl leading-[0.9] mb-8 tracking-tighter text-slate-900 dark:text-white">
+           <h1 className="font-syne font-black text-4xl sm:text-5xl md:text-7xl leading-[0.9] mb-8 tracking-tighter text-slate-900 dark:text-white">
              <span className="typewriter-cursor">{displayText}</span>
            </h1>
         </div>
@@ -191,7 +191,7 @@ export default function LandingPage() {
             key={mod.letter}
             onClick={() => handleModuleClick(mod.href)}
             className={`animate-on-scroll opacity-0 transition-all duration-1000 ease-out flex items-center group
-              ${i % 2 === 0 ? '-translate-x-12' : 'translate-x-12'}
+              ${i % 2 === 0 ? 'md:-translate-x-12' : 'md:translate-x-12'}
             `}
           >
             <div className={`glass-card w-full flex flex-col md:flex-row items-center p-8 md:p-12 rounded-[40px] cursor-pointer hover:shadow-2xl transition-all duration-500 border-l-[6px]`}

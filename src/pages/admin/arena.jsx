@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import Image from 'next/image';
 import { 
   CalendarDays, 
   MapPin, 
@@ -37,6 +38,12 @@ function ArenaAdminContent() {
   });
 
   const [photoUrl, setPhotoUrl] = useState('');
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [selectedEventId, setSelectedEventId] = useState(events[0]?.id || '');
+
+  const changeStatus = (id, newStatus) => {
+    updateEvent(id, { status: newStatus });
+  };
 
   const addPhoto = () => {
     if (!photoUrl) return;
@@ -55,19 +62,26 @@ function ArenaAdminContent() {
   };
 
   const handleDeploy = () => {
-    // Map minimal admin fields to standard user event model if necessary
     const eventToDeploy = {
       ...newEvent,
+      id: editingEvent?.id,
       organizer: 'Campus Admin',
-      status: 'Upcoming',
-      capacity: { total: parseInt(newEvent.capacity) || 500, filled: 0 },
+      status: editingEvent?.status || 'Upcoming',
+      capacity: { total: parseInt(newEvent.capacity) || 500, filled: editingEvent?.capacity?.filled || 0 },
       location: 'To be announced',
       coverImage: newEvent.photos[0]?.url || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80',
       tags: [newEvent.category],
       timeline: { startsIn: 'Upcoming', duration: 'TBD' }
     };
-    addEvent(eventToDeploy);
+
+    if (editingEvent) {
+      updateEvent(editingEvent.id, eventToDeploy);
+    } else {
+      addEvent(eventToDeploy);
+    }
+    
     setShowCreateModal(false);
+    setEditingEvent(null);
     setNewEvent({ title: '', category: 'Hackathon', date: '', capacity: 500, registrationLink: '', photos: [] });
   };
 
@@ -136,10 +150,10 @@ function ArenaAdminContent() {
                           
                           <div className="flex flex-col gap-2">
                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl border border-slate-200 dark:border-white/5">
-                               <CalendarDays size={14} className="text-pink-500" /> {ev.date}
+                               <CalendarDays size={14} className="text-pink-500" /> {ev.date || 'TBD'}
                              </div>
                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950 px-3 py-2 rounded-xl border border-slate-200 dark:border-white/5">
-                               <MapPin size={14} className="text-pink-500" /> {ev.location}
+                               <MapPin size={14} className="text-pink-500" /> {ev.location || 'Main Campus'}
                              </div>
                           </div>
                        </div>
@@ -168,7 +182,21 @@ function ArenaAdminContent() {
                             <Play size={16} className="mb-1" />
                             <span className="text-[8px] font-black uppercase tracking-widest">Activate</span>
                           </button>
-                          <button className="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-500/10 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-500 transition-colors">
+                          <button 
+                            onClick={() => {
+                              setEditingEvent(ev);
+                              setNewEvent({
+                                title: ev.title,
+                                category: ev.category,
+                                date: ev.date || '',
+                                capacity: ev.capacity?.total || ev.capacity || 500,
+                                registrationLink: ev.registrationLink || '',
+                                photos: ev.photos || []
+                              });
+                              setShowCreateModal(true);
+                            }}
+                            className="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-500/10 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
+                          >
                             <Edit2 size={16} className="mb-1" />
                             <span className="text-[8px] font-black uppercase tracking-widest">Edit</span>
                           </button>
@@ -197,11 +225,14 @@ function ArenaAdminContent() {
                   
                   <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
                      {events.map((ev, i) => (
-                        <button key={i} className={`px-6 py-4 rounded-2xl border-2 whitespace-nowrap text-xs font-black uppercase tracking-widest transition-all ${
-                          i === 0 ? 'bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-500 border-pink-200 dark:border-pink-500/30' : 'bg-slate-50 dark:bg-slate-950 text-slate-500 border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20'
-                        }`}>
-                          {ev.title}
-                        </button>
+                        <button 
+                          key={ev.id} 
+                          onClick={() => setSelectedEventId(ev.id)}
+                          className={`px-6 py-4 rounded-2xl border-2 whitespace-nowrap text-xs font-black uppercase tracking-widest transition-all ${
+                           ev.id === selectedEventId ? 'bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-500 border-pink-200 dark:border-pink-500/30' : 'bg-slate-50 dark:bg-slate-950 text-slate-500 border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20'
+                         }`}>
+                           {ev.title}
+                         </button>
                      ))}
                   </div>
 
@@ -216,22 +247,27 @@ function ArenaAdminContent() {
                          </tr>
                        </thead>
                        <tbody className="divide-y divide-slate-200 dark:divide-white/5">
-                         {[
-                           { t: 'TK-849', name: 'Rohan Sharma', id: '24BCE10023', m: 'Solo' },
-                           { t: 'TK-850', name: 'Priya Patel', id: '24BCE10105', m: 'Duo Sync' },
-                           { t: 'TK-851', name: 'Amit Kumar', id: '24BME20044', m: 'Trio' },
-                         ].map(row => (
-                           <tr key={row.t} className="hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
-                              <td className="p-6 font-bold text-slate-500 dark:text-slate-400 text-sm">{row.t}</td>
-                              <td className="p-6 font-bold text-slate-900 dark:text-white text-sm">{row.name}</td>
-                              <td className="p-6 font-bold text-slate-500 dark:text-slate-400 text-sm">{row.id}</td>
-                              <td className="p-6">
-                                <span className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest">
-                                  {row.m}
-                                </span>
+                          {registrations
+                            .filter(r => r.eventId === selectedEventId || !selectedEventId)
+                            .map(row => (
+                            <tr key={row.id} className="hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                               <td className="p-6 font-bold text-slate-500 dark:text-slate-400 text-sm">{row.id}</td>
+                               <td className="p-6 font-bold text-slate-900 dark:text-white text-sm">{row.studentName}</td>
+                               <td className="p-6 font-bold text-slate-500 dark:text-slate-400 text-sm">{row.userId}</td>
+                               <td className="p-6">
+                                 <span className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                                   {row.status}
+                                 </span>
+                               </td>
+                            </tr>
+                          ))}
+                          {registrations.filter(r => r.eventId === selectedEventId).length === 0 && (
+                            <tr>
+                              <td colSpan={4} className="p-10 text-center text-xs font-black text-slate-400 uppercase tracking-widest opacity-50">
+                                No registrations found for this event
                               </td>
-                           </tr>
-                         ))}
+                            </tr>
+                          )}
                        </tbody>
                      </table>
                   </div>
@@ -251,8 +287,16 @@ function ArenaAdminContent() {
                  <div className="h-2 bg-gradient-to-r from-pink-500 to-purple-500" />
                  <div className="p-10 space-y-8">
                     <div className="flex items-center justify-between">
-                       <h3 className="text-3xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Event Creator</h3>
-                       <button onClick={() => setShowCreateModal(false)} className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                       <h3 className="text-3xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">
+                         {editingEvent ? 'Event Editor' : 'Event Creator'}
+                       </h3>
+                       <button 
+                        onClick={() => {
+                          setShowCreateModal(false);
+                          setEditingEvent(null);
+                        }} 
+                        className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                      >
                          <Plus size={24} className="rotate-45" />
                        </button>
                     </div>
@@ -334,7 +378,7 @@ function ArenaAdminContent() {
                           <div className="flex flex-wrap gap-3 mt-4">
                             {newEvent.photos.map((p, idx) => (
                               <div key={idx} className="relative group/photo w-24 h-24 rounded-2xl overflow-hidden border-2 border-slate-100 dark:border-white/5">
-                                <img src={p.url} className="w-full h-full object-cover" alt="" />
+                                <Image src={p.url} className="object-cover" alt={`Event Photo ${idx + 1}`} fill />
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity flex flex-col items-center justify-center p-2">
                                   <span className="text-[8px] font-black text-white uppercase mb-1">Order: {p.order + 1}</span>
                                   <button 

@@ -164,7 +164,7 @@ function ArenaContent() {
                     key={event.id}
                     className={`absolute inset-0 transition-all duration-1000 ease-in-out ${idx === carouselIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110 pointer-events-none'}`}
                   >
-                    <img src={event.coverImage} className="w-full h-full object-cover" alt={event.title} />
+                    <Image src={event.coverImage} className="object-cover" alt={event.title} fill />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-12">
                       <div className="space-y-4 max-w-2xl animate-in slide-in-from-bottom-8 duration-700">
                         <div className="flex gap-2">
@@ -323,7 +323,14 @@ function ArenaContent() {
                     {filteredActivity.length > 0 ? (
                       filteredActivity.map(act => (
                         <div key={act.id} className="p-6 flex items-center gap-6 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                          <img src={FRIENDS.find(f => f.id === act.friendId)?.avatar} className="w-12 h-12 rounded-2xl object-cover border-2 border-slate-200 dark:border-white/10" alt="Friend Activity" />
+                          <div className="relative w-12 h-12 rounded-2xl overflow-hidden border-2 border-slate-200 dark:border-white/10 flex-shrink-0">
+                            <Image 
+                              src={FRIENDS.find(f => f.id === act.friendId)?.avatar} 
+                              alt="Friend Activity"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
                           <div className="flex-1">
                             <p className="text-sm font-bold text-slate-900 dark:text-white/90 leading-snug">{act.text}</p>
                             <p className="text-[10px] font-bold text-gray-500 uppercase mt-1 tracking-widest">{act.time}</p>
@@ -347,7 +354,9 @@ function ArenaContent() {
                   <div className="space-y-4">
                     {pendingNetworkRequests.map(req => (
                       <div key={req.id} className="bg-white dark:bg-[#1a1a2e] rounded-[40px] p-6 border-2 border-slate-100 dark:border-white/5 flex items-center gap-6 shadow-xl">
-                        <img src={req.avatar} className="w-16 h-16 rounded-3xl object-cover border-4 border-slate-100 dark:border-slate-900 shadow-lg" alt={req.name} />
+                        <div className="relative w-16 h-16 rounded-3xl overflow-hidden border-4 border-slate-100 dark:border-slate-900 shadow-lg flex-shrink-0">
+                          <Image src={req.avatar} className="object-cover" alt={req.name} fill />
+                        </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="text-lg font-black text-slate-900 dark:text-white leading-tight">{req.name}</h4>
                           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mt-1">{req.branch}</p>
@@ -429,7 +438,7 @@ function ArenaContent() {
 
             {/* Banner Side */}
             <div className="relative w-full md:w-2/5 h-64 md:h-full shrink-0">
-              <img src={selectedEvent.coverImage} className="w-full h-full object-cover" alt={selectedEvent.title} />
+                <Image src={selectedEvent.coverImage} className="object-cover" alt={selectedEvent.title} fill priority />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent md:bg-gradient-to-r p-10 flex flex-col justify-end">
                 <div className="space-y-2">
                   <span className="bg-amber-500 text-white text-[9px] font-black uppercase px-4 py-1.5 rounded-full tracking-widest">{selectedEvent.tags[0]}</span>
@@ -498,7 +507,9 @@ function ArenaContent() {
                       {FRIENDS.map(friend => (
                         <div key={friend.id} className="flex flex-col items-center gap-3 transition-all active:scale-95 group min-w-[90px] snap-center shrink-0">
                           <div className="relative">
-                            <img src={friend.avatar} className="w-16 h-16 rounded-2xl object-cover border-4 border-transparent group-hover:border-amber-500 transition-all shadow-2xl scale-95 group-hover:scale-100" alt={friend.name} />
+                            <div className="relative w-16 h-16 rounded-2xl overflow-hidden border-4 border-transparent group-hover:border-amber-500 transition-all shadow-2xl scale-95 group-hover:scale-100">
+                              <Image src={friend.avatar} className="object-cover" alt={friend.name} fill />
+                            </div>
                             <div className={`absolute -top-2 -right-2 w-8 h-8 rounded-xl flex items-center justify-center shadow-2xl transition-all ${sentRequests.includes(friend.id) ? 'bg-green-500 text-white scale-110' : 'bg-white text-slate-900 hover:bg-amber-500 hover:text-white'}`}>
                               <button onClick={() => sendTeamRequest(friend, selectedEvent.title)}>
                                 {sentRequests.includes(friend.id) ? <CheckCircle2 size={16} /> : <UserPlus size={16} />}
@@ -538,7 +549,7 @@ function ArenaContent() {
                         className="flex-shrink-0 w-32 space-y-2 group cursor-pointer"
                       >
                         <div className="h-32 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-all">
-                          <img src={event.coverImage} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={event.title} />
+                          <Image src={event.coverImage} className="object-cover group-hover:scale-110 transition-transform duration-500" alt={event.title} fill />
                         </div>
                         {/* FONT SIZE INCREASED */}
                         <p className="text-xs font-black text-slate-700 dark:text-white/80 uppercase tracking-tight line-clamp-2">{event.title}</p>
@@ -714,7 +725,7 @@ function ArenaContent() {
 
               <div className="bg-slate-50 dark:bg-white/5 rounded-[40px] p-2 flex items-center gap-6 pr-8">
                 <div className="w-24 h-24 rounded-[35px] overflow-hidden shrink-0 shadow-xl border-4 border-white dark:border-slate-800">
-                  <img src={incomingSyncRequest.event.banner} className="w-full h-full object-cover" alt={incomingSyncRequest.event.title} />
+                  <Image src={incomingSyncRequest.event.banner} className="object-cover" alt={incomingSyncRequest.event.title} fill />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-black text-slate-400 dark:text-white/40 uppercase tracking-widest leading-none mb-2">Event</p>
@@ -723,7 +734,9 @@ function ArenaContent() {
               </div>
 
               <div className="flex items-center gap-6 p-6 bg-amber-500/10 rounded-[35px] border-2 border-amber-500/20">
-                <img src={incomingSyncRequest.requester.avatar} className="w-16 h-16 rounded-3xl object-cover border-4 border-white dark:border-slate-800 shadow-lg" alt={incomingSyncRequest.requester.name} />
+                <div className="relative w-16 h-16 rounded-3xl overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg flex-shrink-0">
+                  <Image src={incomingSyncRequest.requester.avatar} className="object-cover" alt={incomingSyncRequest.requester.name} fill />
+                </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
                     <span className="text-amber-500 font-extrabold">{incomingSyncRequest.requester.name}</span> wants you to join this event together.
