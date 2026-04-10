@@ -24,7 +24,12 @@ import {
   Users2,
   UserPlus,
   ChevronLeft,
-  Smartphone
+  Smartphone,
+  X,
+  Send,
+  Map as MapIcon,
+  Filter as FilterIcon,
+  ExternalLink
 } from 'lucide-react';
 import { EVENTS, EVENT_CATEGORIES, DASHBOARD_STATS, FRIENDS, TEAM_TIERS, SUGGESTED_TEAMMATES, NETWORK_ACTIVITY } from '@/data/arenaData';
 import { ArenaProvider, useArena } from '@/context/ArenaContext';
@@ -58,6 +63,11 @@ function ArenaContent() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [showTicket, setShowTicket] = useState(false);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
+  
+  // NEW STATE FOR OVERHAUL
+  const [teammateFilter, setTeammateFilter] = useState('All');
+  const [selectedSyncEvent, setSelectedSyncEvent] = useState('');
+  const [invitedSyncFriends, setInvitedSyncFriends] = useState([]);
 
   const TABS = ['Events', 'Network', 'My Tickets'];
 
@@ -243,6 +253,18 @@ function ArenaContent() {
                               <span className="text-[10px] font-black text-white/80 uppercase tracking-widest flex items-center gap-2"><Users size={14} className="text-amber-500" /> {event.capacity.filled}/{event.capacity.total} Filled</span>
                               {isRegistered && <span className="text-[10px] font-black text-green-400 uppercase tracking-widest flex items-center gap-1"><CheckCircle2 size={12} /> Registered</span>}
                             </div>
+                            <div className="flex items-center gap-2">
+                              <div className="flex -space-x-2">
+                                {FRIENDS.slice(0, 3).map(f => (
+                                  <div key={f.id} className="w-5 h-5 rounded-full border-2 border-slate-900 overflow-hidden relative">
+                                    <Image src={f.avatar} alt={f.name} fill className="object-cover" />
+                                  </div>
+                                ))}
+                              </div>
+                              <span className="text-[9px] font-black text-white/60 uppercase tracking-tighter">
+                                {FRIENDS[0].name} + {Math.floor(Math.random() * 5) + 2} others going
+                              </span>
+                            </div>
                             <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                               <div className={`h-full transition-all duration-1000 ${isFull ? 'bg-amber-500' : 'bg-blue-500'}`} style={{ width: `${capacityPercent}%` }} />
                             </div>
@@ -272,41 +294,133 @@ function ArenaContent() {
                 </div>
               </div>
 
-              {/* SUGGESTED TEAMMATES */}
+              {/* QUICK ACTION PILLS */}
+              <div className="flex flex-wrap justify-center gap-3">
+                {[
+                  { label: 'Start Sync', icon: <Zap size={14} />, color: 'amber' },
+                  { label: 'My Friends', icon: <Users2 size={14} />, color: 'indigo' },
+                  { label: 'Find on Map', icon: <MapIcon size={14} />, color: 'green' },
+                  { label: 'Find Teammates', icon: <Trophy size={14} />, color: 'blue' }
+                ].map((pill, i) => (
+                  <button key={i} className={`flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-white/5 rounded-full text-[10px] font-black uppercase tracking-widest hover:border-${pill.color}-500/50 hover:text-${pill.color}-500 transition-all shadow-md`}>
+                    {pill.icon} {pill.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* TEAMMATE FINDER FILTER & SUGGESTED TEAMMATES */}
               <div className="space-y-6">
-                <div className="flex items-center justify-between px-2">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center gap-3 px-2">
                     <div className="w-10 h-10 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
                       <Zap size={20} fill="currentColor" />
                     </div>
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Suggested Teammates</h3>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Teammate Finder</h3>
+                  </div>
+                  
+                  <div className="flex gap-2 px-2 overflow-x-auto scrollbar-none">
+                    {['All', 'Looking for Team', 'Design', 'Backend', 'Mobile', 'AI/ML'].map(cat => (
+                      <button 
+                        key={cat}
+                        onClick={() => setTeammateFilter(cat)}
+                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border-2 whitespace-nowrap ${teammateFilter === cat ? 'bg-amber-500 border-amber-500 text-white shadow-lg' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-white/5 text-slate-400 hover:border-amber-500/30'}`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <div className="flex gap-6 overflow-x-auto pb-8 -mx-4 px-4 scrollbar-none snap-x h-[280px]">
-                  {filteredTeammates.length > 0 ? (
-                    filteredTeammates.map(student => (
-                      <div key={student.id} className="flex-shrink-0 w-80 bg-white dark:bg-[#1a1a2e] border-2 border-slate-100 dark:border-white/5 rounded-[40px] p-8 shadow-2xl snap-center hover:border-amber-500/50 transition-all group/card relative overflow-hidden">
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="relative w-16 h-16 rounded-3xl overflow-hidden border-4 border-slate-100 dark:border-slate-900 shadow-xl">
-                            <Image 
-                              src={student.avatar} 
-                              alt={student.name}
-                              fill
-                              className="object-cover"
-                            />
+                <div className="flex gap-6 overflow-x-auto pb-8 -mx-4 px-4 scrollbar-none snap-x h-[360px]">
+                  {filteredTeammates
+                    .filter(t => teammateFilter === 'All' || teammateFilter === 'Looking for Team' ? (teammateFilter === 'Looking for Team' ? t.isAvailable : true) : t.skills.includes(teammateFilter))
+                    .map(student => (
+                      <div key={student.id} className="flex-shrink-0 w-80 bg-white dark:bg-[#1a1a2e] border-2 border-slate-100 dark:border-white/5 rounded-[40px] p-8 shadow-2xl snap-center hover:border-amber-500/50 transition-all group/card relative overflow-hidden flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="relative w-16 h-16 rounded-3xl overflow-hidden border-4 border-slate-100 dark:border-slate-900 shadow-xl">
+                              <Image src={student.avatar} alt={student.name} fill className="object-cover" />
+                            </div>
+                            <button className="px-6 py-2 border-2 border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-90">
+                              + Connect
+                            </button>
                           </div>
-                          <button className="px-6 py-2 border-2 border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-full transition-all active:scale-90">
-                            + Connect
-                          </button>
+                          <h4 className="text-xl font-black text-slate-900 dark:text-white">{student.name}</h4>
+                          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">{student.branch} · Sem {student.semester}</p>
+                          
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {student.skills.map(skill => (
+                              <span key={skill} className="px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-lg text-[8px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-tighter">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                        <h4 className="text-xl font-black text-slate-900 dark:text-white">{student.name}</h4>
-                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{student.branch} · Sem {student.semester}</p>
+
+                        <div className={`flex items-center gap-2 ${student.isAvailable ? 'text-green-500' : 'text-slate-400'} text-[9px] font-black uppercase tracking-widest`}>
+                          <div className={`w-2 h-2 rounded-full ${student.isAvailable ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
+                          {student.isAvailable ? 'Open to team up' : 'Focusing on individual'}
+                        </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="w-full py-16 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">No teammates found</div>
-                  )}
+                    ))}
+                </div>
+              </div>
+
+              {/* SYNC UP PANEL */}
+              <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-[50px] p-10 border border-white/10 shadow-3xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 blur-[100px] -mr-32 -mt-32 rounded-full" />
+                
+                <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                  <div className="flex-1 space-y-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                        <Zap size={24} fill="currentColor" />
+                      </div>
+                      <div>
+                        <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">Sync Up</h3>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">Start a Sync Group for an event</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-2">Select Event</label>
+                        <select 
+                          value={selectedSyncEvent}
+                          onChange={(e) => setSelectedSyncEvent(e.target.value)}
+                          className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold text-sm outline-none focus:border-amber-500 transition-all appearance-none"
+                        >
+                          <option value="" disabled className="bg-slate-900">Choose Event</option>
+                          {arenaEvents.map(ev => (
+                            <option key={ev.id} value={ev.id} className="bg-slate-900">{ev.title}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-2">Add Friends</label>
+                        <div className="flex flex-wrap gap-2 p-1.5 bg-white/5 border border-white/10 rounded-2xl min-h-[54px] items-center">
+                          {invitedSyncFriends.map(fId => (
+                            <span key={fId} className="px-3 py-1 bg-amber-500 rounded-lg text-[9px] font-black text-white flex items-center gap-2">
+                              {FRIENDS.find(f => f.id === fId)?.name}
+                              <button onClick={() => setInvitedSyncFriends(prev => prev.filter(id => id !== fId))}><X size={10} /></button>
+                            </span>
+                          ))}
+                          <button className="text-[9px] font-black text-indigo-400 hover:text-white px-3">+ Add Friend</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button className="w-full py-5 bg-amber-500 text-white rounded-[25px] font-black text-xs uppercase tracking-[0.3em] hover:bg-amber-600 shadow-xl shadow-amber-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+                      <Send size={16} /> Send Sync Request
+                    </button>
+                  </div>
+                  
+                  <div className="w-full md:w-64 h-64 bg-slate-800/50 rounded-[40px] border border-white/5 flex flex-col items-center justify-center p-8 text-center space-y-4">
+                    <div className="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center text-indigo-400">
+                      <Users2 size={40} />
+                    </div>
+                    <p className="text-xs font-bold text-slate-400">Collaborate in real-time with your campus network</p>
+                  </div>
                 </div>
               </div>
 
@@ -317,12 +431,12 @@ function ArenaContent() {
                     <div className="w-10 h-10 bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
                       <Users2 size={20} />
                     </div>
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Activity</h3>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Activity Feed</h3>
                   </div>
                   <div className="bg-white dark:bg-[#1a1a2e]/50 rounded-[45px] border-4 border-slate-100 dark:border-white/5 divide-y divide-slate-100 dark:divide-white/5 overflow-hidden shadow-2xl">
-                    {filteredActivity.length > 0 ? (
-                      filteredActivity.map(act => (
-                        <div key={act.id} className="p-6 flex items-center gap-6 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    {NETWORK_ACTIVITY.length > 0 ? (
+                      NETWORK_ACTIVITY.map(act => (
+                        <div key={act.id} className={`p-6 flex items-center gap-6 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors border-l-8 ${act.type === 'registration' ? 'border-indigo-500' : act.type === 'location' ? 'border-green-500' : 'border-amber-500'}`}>
                           <div className="relative w-12 h-12 rounded-2xl overflow-hidden border-2 border-slate-200 dark:border-white/10 flex-shrink-0">
                             <Image 
                               src={FRIENDS.find(f => f.id === act.friendId)?.avatar} 
@@ -335,38 +449,87 @@ function ArenaContent() {
                             <p className="text-sm font-bold text-slate-900 dark:text-white/90 leading-snug">{act.text}</p>
                             <p className="text-[10px] font-bold text-gray-500 uppercase mt-1 tracking-widest">{act.time}</p>
                           </div>
+                          <button className="p-3 bg-slate-100 dark:bg-white/5 rounded-2xl text-indigo-500 hover:bg-indigo-500 hover:text-white transition-all whitespace-nowrap text-[8px] font-black uppercase tracking-widest">
+                            {act.type === 'registration' ? 'Join Too →' : act.type === 'location' ? 'View Map →' : 'View →'}
+                          </button>
                         </div>
                       ))
                     ) : (
-                      <div className="p-16 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">No activity found</div>
+                      <div className="p-16 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">No Recent Activity</div>
                     )}
                   </div>
                 </div>
 
                 {/* FRIEND REQUESTS */}
                 <div className="space-y-6">
-                  <div className="flex items-center gap-3 px-2">
-                    <div className="w-10 h-10 bg-pink-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                      <UserPlus size={20} />
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-pink-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                        <UserPlus size={20} />
+                      </div>
+                      <h3 className="text-2xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Requests</h3>
                     </div>
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Requests</h3>
+                    <button className="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline">See All Friends →</button>
                   </div>
                   <div className="space-y-4">
                     {pendingNetworkRequests.map(req => (
-                      <div key={req.id} className="bg-white dark:bg-[#1a1a2e] rounded-[40px] p-6 border-2 border-slate-100 dark:border-white/5 flex items-center gap-6 shadow-xl">
+                      <div key={req.id} className="bg-white dark:bg-[#1a1a2e] rounded-[40px] p-6 border-2 border-slate-100 dark:border-white/5 flex items-center gap-6 shadow-xl relative group">
                         <div className="relative w-16 h-16 rounded-3xl overflow-hidden border-4 border-slate-100 dark:border-slate-900 shadow-lg flex-shrink-0">
                           <Image src={req.avatar} className="object-cover" alt={req.name} fill />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="text-lg font-black text-slate-900 dark:text-white leading-tight">{req.name}</h4>
                           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none mt-1">{req.branch}</p>
+                          <p className="text-[8px] font-bold text-indigo-500 uppercase mt-2">{req.mutualCount} Mutual Friends</p>
                         </div>
-                        <div className="flex gap-2">
-                          <button onClick={() => acceptNetworkRequest(req.id)} className="px-6 py-3 bg-amber-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Accept</button>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => acceptNetworkRequest(req.id)} className="px-6 py-3 bg-indigo-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Accept</button>
+                          <button onClick={() => declineNetworkRequest(req.id)} className="w-12 h-12 bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-red-500 rounded-2xl flex items-center justify-center transition-all">
+                            <X size={18} />
+                          </button>
                         </div>
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+
+              {/* MY FRIENDS SECTION */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 px-2">
+                  <div className="w-10 h-10 bg-green-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <Users size={20} />
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">My Friends <span className="text-slate-400 ml-2">({FRIENDS.length})</span></h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {FRIENDS.map(friend => (
+                    <div key={friend.id} className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-white/5 rounded-[40px] p-8 shadow-xl hover:border-indigo-500/30 transition-all group">
+                      <div className="flex items-center gap-6 mb-6">
+                        <div className="relative w-16 h-16 rounded-3xl overflow-hidden border-4 border-slate-50 dark:border-slate-800">
+                          <Image src={friend.avatar} alt={friend.name} fill className="object-cover" />
+                          <div className={`absolute top-1 right-1 w-3 h-3 rounded-full border-2 border-white dark:border-slate-800 ${friend.isOnline ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-lg font-black text-slate-900 dark:text-white leading-tight">{friend.name}</h4>
+                          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{friend.branch} · Sem {friend.semester}</p>
+                          <p className={`text-[9px] font-bold mt-1 ${friend.isOnline ? 'text-green-500' : 'text-slate-400'}`}>
+                            {friend.isOnline ? 'Online' : 'Offline'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <button className="flex items-center justify-center gap-2 py-3 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
+                          <MapIcon size={14} /> Locate
+                        </button>
+                        <button className="flex items-center justify-center gap-2 py-3 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all">
+                          <Zap size={14} /> Duo Sync
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -548,7 +711,7 @@ function ArenaContent() {
                         onClick={() => setSelectedEvent(event)}
                         className="flex-shrink-0 w-32 space-y-2 group cursor-pointer"
                       >
-                        <div className="h-32 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-all">
+                        <div className="relative h-32 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-all">
                           <Image src={event.coverImage} className="object-cover group-hover:scale-110 transition-transform duration-500" alt={event.title} fill />
                         </div>
                         {/* FONT SIZE INCREASED */}
@@ -724,7 +887,7 @@ function ArenaContent() {
               </div>
 
               <div className="bg-slate-50 dark:bg-white/5 rounded-[40px] p-2 flex items-center gap-6 pr-8">
-                <div className="w-24 h-24 rounded-[35px] overflow-hidden shrink-0 shadow-xl border-4 border-white dark:border-slate-800">
+                <div className="relative w-24 h-24 rounded-[35px] overflow-hidden shrink-0 shadow-xl border-4 border-white dark:border-slate-800">
                   <Image src={incomingSyncRequest.event.banner} className="object-cover" alt={incomingSyncRequest.event.title} fill />
                 </div>
                 <div className="flex-1 min-w-0">
