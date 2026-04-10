@@ -75,7 +75,7 @@ function ArenaContent() {
   }, [featuredEvents.length, activeTab]);
 
   const filteredEvents = useMemo(() => {
-    return events.filter(event => {
+    return arenaEvents.filter(event => {
       const matchesCategory = activeCategory === 'All' || event.tags?.includes(activeCategory) || event.status === activeCategory;
       const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.organizer.toLowerCase().includes(searchQuery.toLowerCase());
