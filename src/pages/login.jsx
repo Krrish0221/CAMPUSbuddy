@@ -240,6 +240,21 @@ export default function LoginPage() {
                       </div>
                       <p className="mt-2 text-[10px] text-gray-400 italic">Exactly 10 digits required</p>
                     </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#1A56DB]">Student Email</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#1A56DB]"><Mail size={18} /></div>
+                        <input 
+                          type="email" 
+                          required 
+                          value={email} 
+                          onChange={(e) => setEmail(e.target.value)} 
+                          className="block w-full pl-11 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-white/5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-slate-900 dark:text-white" 
+                          placeholder="student@college.edu" 
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
 

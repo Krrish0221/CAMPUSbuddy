@@ -9,42 +9,42 @@ export default function HomePage() {
       letter: 'C',
       name: 'Caffinity',
       description: 'Campus food ordering system. Skip the queue and order ahead.',
-      href: '/caffinity',
+      href: '/user/caffinity',
       color: '#1A56DB' // blue
     },
     {
       letter: 'A',
       name: 'Arena',
       description: 'Sports and facility booking. Reserve your spot on the court.',
-      href: '/arena',
+      href: '/user/arena',
       color: '#D97706' // amber
     },
     {
       letter: 'M',
       name: 'Mapping',
       description: 'Find your way around campus with detailed maps and routing.',
-      href: '/map',
+      href: '/user/map',
       color: '#0F6E56' // green
     },
     {
       letter: 'P',
       name: 'ProblemBox',
       description: 'Report issues and track maintenance requests on campus.',
-      href: '/problembox',
+      href: '/user/problembox',
       color: '#DC2626' // red
     },
     {
       letter: 'U',
       name: 'UAssist',
       description: 'Academic resources, notes, and collaborative study groups.',
-      href: '/uassist',
+      href: '/user/uassist',
       color: '#7C3AED' // purple
     },
     {
       letter: 'S',
       name: 'Shopperz',
       description: 'Buy and sell textbooks, electronics, and dorm essentials.',
-      href: '/shopperz',
+      href: '/user/shopperz',
       color: '#EA580C' // orange
     }
   ];
