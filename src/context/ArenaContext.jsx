@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { MOCK_REGISTRATIONS, PENDING_NETWORK_REQUESTS, EVENTS } from '@/data/arenaData';
 
 const ArenaContext = createContext();

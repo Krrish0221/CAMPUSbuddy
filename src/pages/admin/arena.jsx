@@ -25,7 +25,7 @@ const INITIAL_EVENTS = [
 ];
 
 function ArenaAdminContent() {
-  const { events, updateEvent, deleteEvent, addEvent } = useArena();
+  const { arenaEvents: events, updateEvent, deleteEvent, addEvent, registrations } = useArena();
   const [activeTab, setActiveTab] = useState('Event Directory');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newEvent, setNewEvent] = useState({
