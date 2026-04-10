@@ -62,7 +62,7 @@ function ArenaContent() {
 
   const friendScrollRef = useRef(null);
 
-  const featuredEvents = useMemo(() => EVENTS.filter(e => e.isFeatured), []);
+  const featuredEvents = useMemo(() => events.filter(e => e.isFeatured), [events]);
 
   // Auto-carousel logic
   useEffect(() => {
@@ -74,13 +74,13 @@ function ArenaContent() {
   }, [featuredEvents.length, activeTab]);
 
   const filteredEvents = useMemo(() => {
-    return EVENTS.filter(event => {
-      const matchesCategory = activeCategory === 'All' || event.tags.includes(activeCategory) || event.status === activeCategory;
+    return events.filter(event => {
+      const matchesCategory = activeCategory === 'All' || event.tags?.includes(activeCategory) || event.status === activeCategory;
       const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.organizer.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, events]);
 
   const scrollFriends = (direction) => {
     if (friendScrollRef.current) {
@@ -530,7 +530,7 @@ function ArenaContent() {
                 <div className="space-y-4">
                   <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">You might also like</h4>
                   <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none">
-                    {EVENTS.filter(e => e.id !== selectedEvent.id).map(event => (
+                    {events.filter(e => e.id !== selectedEvent.id).map(event => (
                       <div
                         key={event.id}
                         onClick={() => setSelectedEvent(event)}

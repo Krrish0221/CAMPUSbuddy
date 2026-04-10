@@ -74,16 +74,17 @@ export default function StudentTicketTracker({ ticket }) {
 
         {/* DETAILS SECTION */}
         <div className="lg:col-span-2 space-y-8">
-           {/* AI SUMMARY BOX */}
            <div className="bg-white dark:bg-slate-900/50 p-8 rounded-[40px] border-l-8 border-blue-500 shadow-2xl space-y-4">
              <div className="flex items-center gap-3">
-               <div className="w-10 h-10 bg-blue-500 rounded-2xl flex items-center justify-center text-white">
+               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white ${ticket.officialResponse ? 'bg-amber-500' : 'bg-blue-500'}`}>
                  <MessageSquare size={20} />
                </div>
-               <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase italic">🤖 UAssist Summary</h3>
+               <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase italic">
+                 {ticket.officialResponse ? '📣 Official Response' : '🤖 UAssist Summary'}
+               </h3>
              </div>
-             <p className="text-sm font-bold text-slate-500 leading-relaxed italic">
-               &quot;{ticket.aiSummary}&quot;
+             <p className={`text-sm font-bold leading-relaxed italic ${ticket.officialResponse ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>
+               &quot;{ticket.officialResponse || ticket.aiSummary}&quot;
              </p>
            </div>
 
@@ -135,9 +136,9 @@ export default function StudentTicketTracker({ ticket }) {
                  <CheckCircle2 size={40} />
                </div>
                <div className="space-y-2">
-                 <h4 className="text-2xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">Fixed by Network Operations</h4>
-                 <p className="text-sm font-bold text-slate-500 italic">&quot;Router reset, connectivity restored.&quot;</p>
-                 <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Resolved in: 3 hours 20 mins</p>
+                 <h4 className="text-2xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">Fixed by {ticket.resolution?.solvedBy || 'HQ Team'}</h4>
+                 <p className="text-sm font-bold text-slate-500 italic">&quot;{ticket.resolution?.desc || 'The issue has been resolved.'}&quot;</p>
+                 <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Resolved in: {ticket.resolution?.duration || 'Unknown'}</p>
                </div>
                
                <div className="flex flex-col items-center gap-4 pt-4">

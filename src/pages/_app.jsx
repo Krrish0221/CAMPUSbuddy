@@ -8,6 +8,7 @@ import { UAssistProvider } from '@/context/UAssistContext';
 import { ShopperzProvider } from '@/context/ShopperzContext';
 import UAssistFab from '@/components/uassist/UAssistFab';
 import UAssistOverlay from '@/components/uassist/UAssistOverlay';
+import GlobalBroadcast from '@/components/uassist/GlobalBroadcast';
 import { AnimatePresence } from 'framer-motion';
 
 const syne = Syne({ 
@@ -106,6 +107,7 @@ export default function App({ Component, pageProps }) {
             <ShopperzProvider>
               <UAssistProvider>
                 <div className={`${syne.variable} ${inter.variable} font-inter antialiased transition-colors duration-500 min-h-screen bg-white dark:bg-[#020617] text-[#0F172A] dark:text-white`}>
+                  <GlobalBroadcast />
                   <Component {...pageProps} />
                   <UAssistFab />
                   <AnimatePresence>

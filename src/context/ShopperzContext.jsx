@@ -5,10 +5,31 @@ const ShopperzContext = createContext();
 
 export function ShopperzProvider({ children }) {
   const [activeSection, setActiveSection] = useState('store'); // 'store' | 'print' | 'market'
+  const [products, setProducts] = useState(RETAIL_PRODUCTS.map(p => ({ ...p, isAvailable: p.stockCount > 0 })));
   const [cart, setCart] = useState([]);
   const [printJobs, setPrintJobs] = useState([]);
   const [marketListings, setMarketListings] = useState(MARKET_LISTINGS);
   const [isExamSeason, setIsExamSeason] = useState(true);
+
+  // 0. RETAIL PRODUCT MANAGEMENT
+  const addProduct = (product) => {
+    const newProduct = {
+      id: `rp-${Math.floor(Math.random() * 9000) + 1000}`,
+      rating: 5.0,
+      totalSold: 0,
+      isAvailable: true,
+      ...product
+    };
+    setProducts(prev => [newProduct, ...prev]);
+  };
+
+  const updateProduct = (id, updates) => {
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const deleteProduct = (id) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+  };
 
   // 1. CART LOGIC
   const addToCart = (product, quantity = 1) => {
@@ -73,6 +94,7 @@ export function ShopperzProvider({ children }) {
   return (
     <ShopperzContext.Provider value={{
       activeSection, setActiveSection,
+      products, addProduct, updateProduct, deleteProduct,
       cart, addToCart, removeFromCart,
       printJobs, addPrintJob,
       marketListings, reserveItem,

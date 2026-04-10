@@ -1,30 +1,44 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { TOOL_REGISTRY, KNOWLEDGE_BASE } from '@/data/uassistData';
+import { ThemeContext } from '@/pages/_app';
 
 const UAssistContext = createContext();
 
 export function UAssistProvider({ children }) {
   const router = useRouter();
+  const { userProfile } = useContext(ThemeContext);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, role: 'ai', content: "👋 Hey! I'm UAssist. I can help you order food, find rooms, report issues, or find events. What do you need?", time: 'Just now' }
+    { id: 1, role: 'ai', content: `👋 Hey ${userProfile?.name?.split(' ')[0] || ''}! I'm UAssist. I can help you order food, find rooms, report issues, or find events. What do you need?`, time: 'Just now' }
   ]);
   const [isThinking, setIsThinking] = useState(false);
   const [thinkingText, setThinkingText] = useState('');
+  const [globalLogs, setGlobalLogs] = useState([]);
   const [queryCount, setQueryCount] = useState(0);
   const queryLimit = 10;
   const [isPremium, setIsPremium] = useState(false);
   const [conversationHistory, setConversationHistory] = useState([]);
   const [prefillText, setPrefillText] = useState('');
 
+  // GLOBAL BROADCAST ENGINE
+  const [globalBroadcast, setGlobalBroadcast] = useState(null);
+
+  const sendGlobalBroadcast = (message) => {
+    setGlobalBroadcast({ id: Date.now(), message });
+  };
+
+  const dismissBroadcast = () => {
+    setGlobalBroadcast(null);
+  };
+
   // 1. CONTEXT DETECTION
   const getActiveContext = () => {
     const path = router.pathname;
-    if (path === '/map') return { type: 'map', label: 'Viewing Campus Map', icon: '🗺' };
+    if (path === '/user/map') return { type: 'map', label: 'Viewing Campus Map', icon: '🗺' };
     if (path.includes('caffinity')) return { type: 'food', label: 'Browsing Caffenity Menu', icon: '🍔' };
-    if (path === '/arena') return { type: 'events', label: 'Viewing Arena Events', icon: '🎫' };
-    if (path === '/problembox') return { type: 'report', label: 'ProblemBox Command Center', icon: '🔧' };
+    if (path === '/user/arena') return { type: 'events', label: 'Viewing Arena Events', icon: '🎫' };
+    if (path === '/user/problembox') return { type: 'report', label: 'ProblemBox Command Center', icon: '🔧' };
     return { type: 'general', label: 'Campus Dashboard', icon: '🤖' };
   };
 
@@ -141,6 +155,16 @@ export function UAssistProvider({ children }) {
     setIsThinking(false);
     setThinkingText('');
     setMessages(prev => [...prev, response]);
+    
+    // LOG TO TELEMETRY
+    setGlobalLogs(prev => [{
+      id: Date.now(),
+      student: userProfile?.name || 'Anonymous',
+      query: text,
+      intent: response.actionCard?.type || 'GENERAL_QUERY',
+      time: 'Just now',
+      fullResponse: response.content
+    }, ...prev]);
   };
 
   const sendMessage = (text) => {
@@ -158,7 +182,9 @@ export function UAssistProvider({ children }) {
       queryCount, queryLimit,
       isPremium, setIsPremium,
       conversationHistory,
-      prefillText, setPrefillText
+      prefillText, setPrefillText,
+      globalBroadcast, sendGlobalBroadcast, dismissBroadcast,
+      globalLogs
     }}>
       {children}
     </UAssistContext.Provider>

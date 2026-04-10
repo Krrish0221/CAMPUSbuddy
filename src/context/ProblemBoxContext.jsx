@@ -53,20 +53,29 @@ export function ProblemBoxProvider({ children }) {
     if (window.navigator.vibrate) window.navigator.vibrate(50);
   };
 
-  const updateTicketStatus = (id, newStatus) => {
+  const updateTicketStatus = (id, newStatus, extraData = {}) => {
     setTickets(prev => prev.map(t => {
       if (t.id === id) {
+        // Handle timeline index finding based on the step name
         const updatedTimeline = t.timeline.map(step => {
-          if (step.step === newStatus) return { ...step, completed: true, active: true, time: 'Just now' };
+          if (step.step === newStatus || (newStatus === 'InProgress' && step.step === 'In Progress')) {
+             return { ...step, completed: true, active: true, time: 'Just now' };
+          }
           if (step.active) return { ...step, active: false };
           return step;
         });
         
         playPing();
-        return { ...t, status: newStatus, timeline: updatedTimeline };
+        return { ...t, status: newStatus, timeline: updatedTimeline, ...extraData };
       }
       return t;
     }));
+  };
+
+  const addAdminResponse = (id, response) => {
+    setTickets(prev => prev.map(t => 
+      t.id === id ? { ...t, aiSummary: response, officialResponse: response } : t
+    ));
   };
 
   const assignTicket = (id, deptId) => {
@@ -97,6 +106,7 @@ export function ProblemBoxProvider({ children }) {
       addTicket,
       upvoteTicket,
       updateTicketStatus,
+      addAdminResponse,
       assignTicket,
       suggestions,
       addSuggestion

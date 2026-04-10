@@ -11,7 +11,7 @@ const modules = [
     tagBg: 'rgba(26, 86, 219, 0.1)',
     tagLabel: 'Food & ordering',
     description: 'Pre-order food from the canteen, pick a time slot, and skip the queue entirely. Live menu and crowd status included.',
-    href: '/caffinity'
+    href: '/user/caffinity'
   },
   {
     letter: 'A',
@@ -20,7 +20,7 @@ const modules = [
     tagBg: 'rgba(217, 119, 6, 0.1)',
     tagLabel: 'Events & activities',
     description: 'All campus events in one feed — hackathons, fests, competitions. Register before the deadline, never miss out again.',
-    href: '/arena'
+    href: '/user/arena'
   },
   {
     letter: 'M',
@@ -29,7 +29,7 @@ const modules = [
     tagBg: 'rgba(5, 150, 105, 0.1)',
     tagLabel: 'Navigation',
     description: 'Interactive campus map to find classrooms, labs, canteens and offices. Built for new students and daily navigation.',
-    href: '/map'
+    href: '/user/map'
   },
   {
     letter: 'P',
@@ -38,7 +38,7 @@ const modules = [
     tagBg: 'rgba(220, 38, 38, 0.1)',
     tagLabel: 'Issue reporting',
     description: 'Report campus issues with a photo, location, and priority. Upvote shared problems and track status from reported to resolved.',
-    href: '/problembox'
+    href: '/user/problembox'
   },
   {
     letter: 'U',
@@ -47,7 +47,7 @@ const modules = [
     tagBg: 'rgba(124, 58, 237, 0.1)',
     tagLabel: 'AI assistant',
     description: 'Your AI campus assistant. Ask anything — it finds directions, orders food, opens ProblemBox, or answers campus FAQs.',
-    href: '/uassist'
+    href: '/user/uassist'
   },
   {
     letter: 'S',
@@ -56,7 +56,7 @@ const modules = [
     tagBg: 'rgba(234, 88, 12, 0.1)',
     tagLabel: 'Campus resources',
     description: 'Find stationery, books, notes and printouts available on campus. Check availability before you walk across campus for nothing.',
-    href: '/shopperz'
+    href: '/user/shopperz'
   }
 ];
 

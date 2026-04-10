@@ -8,6 +8,33 @@ export const CaffinityProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   const [isCanteenSelecting, setIsCanteenSelecting] = useState(true);
+  const [menuItems, setMenuItems] = useState(MENU_ITEMS);
+
+  // Sync menu state to local storage optionally if we wanted persistance
+  useEffect(() => {
+    const savedMenu = localStorage.getItem('caffinity_menu');
+    if (savedMenu) {
+      setMenuItems(JSON.parse(savedMenu));
+    } else {
+      localStorage.setItem('caffinity_menu', JSON.stringify(MENU_ITEMS));
+    }
+  }, []);
+
+  const toggleMenuItemAvailability = (id) => {
+    setMenuItems(prev => {
+      const updated = prev.map(i => i.id === id ? { ...i, isAvailable: !i.isAvailable } : i);
+      localStorage.setItem('caffinity_menu', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const deleteMenuItem = (id) => {
+    setMenuItems(prev => {
+      const updated = prev.filter(i => i.id !== id);
+      localStorage.setItem('caffinity_menu', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -146,7 +173,10 @@ export const CaffinityProvider = ({ children }) => {
     clearCart,
     orders,
     placeOrder,
-    updateOrderStatus
+    updateOrderStatus,
+    menuItems,
+    toggleMenuItemAvailability,
+    deleteMenuItem
   };
 
   return (

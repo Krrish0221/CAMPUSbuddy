@@ -18,7 +18,7 @@ import {
   Smartphone,
   ExternalLink
 } from 'lucide-react';
-import { MENU_ITEMS, MENU_CATEGORIES, CANTEENS } from '@/data/caffinityData';
+import { MENU_CATEGORIES, CANTEENS } from '@/data/caffinityData';
 import { useCaffinity } from '@/context/CaffinityContext';
 
 // Helper: Get Time Ago
@@ -28,21 +28,6 @@ const getTimeAgo = (timestamp) => {
   if (seconds < 60) return 'Just now';
   const mins = Math.floor(seconds / 60);
   return `${mins}m ago`;
-};
-
-// Helper: Estimate Remaining Prep Time
-const getRemainingPrep = (order) => {
-  if (order.status === 'Ready' || order.status === 'Done') return 'Now';
-  
-  const maxPrepStr = order.items.reduce((max, item) => {
-    const itm = MENU_ITEMS.find(mi => mi.id === item.id);
-    const pTime = parseInt(itm?.prepTime || '5');
-    return pTime > max ? pTime : max;
-  }, 0);
-
-  const elapsedMins = Math.floor((new Date() - new Date(order.timestamp)) / 60000);
-  const remaining = Math.max(1, maxPrepStr - elapsedMins);
-  return `${remaining}m`;
 };
 
 export default function CaffinityPage() {
@@ -55,7 +40,8 @@ export default function CaffinityPage() {
     addToCart, 
     updateQuantity, 
     orders, 
-    placeOrder 
+    placeOrder,
+    menuItems
   } = useCaffinity();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,6 +59,21 @@ export default function CaffinityPage() {
     return () => clearInterval(timer);
   }, []);
 
+  // Helper: Estimate Remaining Prep Time
+  const getRemainingPrep = (order) => {
+    if (order.status === 'Ready' || order.status === 'Done') return 'Now';
+    
+    const maxPrepStr = order.items.reduce((max, item) => {
+      const itm = menuItems.find(mi => mi.id === item.id);
+      const pTime = parseInt(itm?.prepTime || '5');
+      return pTime > max ? pTime : max;
+    }, 0);
+
+    const elapsedMins = Math.floor((new Date() - new Date(order.timestamp)) / 60000);
+    const remaining = Math.max(1, maxPrepStr - elapsedMins);
+    return `${remaining}m`;
+  };
+
   const activeOrders = useMemo(() => {
     if (!selectedCanteen) return [];
     return orders.filter(o => 
@@ -82,15 +83,15 @@ export default function CaffinityPage() {
     );
   }, [orders, selectedCanteen]);
 
-  const specialItem = useMemo(() => MENU_ITEMS.find(item => item.isSpecial), []);
+  const specialItem = useMemo(() => menuItems.find(item => item.isSpecial), [menuItems]);
 
   const filteredItems = useMemo(() => {
-    return MENU_ITEMS.filter(item => {
+    return menuItems.filter(item => {
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery, activeCategory, menuItems]);
 
   const cartTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -276,8 +277,10 @@ export default function CaffinityPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map(item => (
-            <div key={item.id} className={`group flex flex-col bg-white rounded-[35px] border-2 border-gray-50 overflow-hidden hover:shadow-2xl transition-all duration-500 ${!item.inStock ? 'grayscale opacity-70' : ''}`}>
+          {filteredItems.map(item => {
+            const isItemAvail = item.isAvailable !== false && item.inStock !== false;
+            return (
+            <div key={item.id} className={`group flex flex-col bg-white rounded-[35px] border-2 border-gray-50 overflow-hidden hover:shadow-2xl transition-all duration-500 ${!isItemAvail ? 'grayscale opacity-70' : ''}`}>
               <div className="relative h-44 overflow-hidden">
                 <img src={item.image} className="w-full h-full object-cover transition duration-700 group-hover:scale-110" alt={item.name} />
                 <div className="absolute top-3 left-3 bg-white/95 px-3 py-1.5 rounded-xl flex items-center gap-2 border border-gray-100 shadow-sm"><Clock size={12} className="text-blue-600" /><span className="text-[10px] font-black text-gray-800 uppercase tracking-tighter">{item.prepTime}</span></div>
@@ -288,10 +291,10 @@ export default function CaffinityPage() {
                   <div className="flex items-center text-[10px] font-black text-yellow-600 bg-yellow-50 px-2.5 py-1 rounded-lg"><Star size={10} className="mr-1 fill-yellow-600" />{item.rating}</div>
                 </div>
                 <h3 className="font-black text-gray-900 text-lg leading-tight mb-2 uppercase tracking-tight">{item.name}</h3>
-                <div className="flex items-center justify-between mt-auto pt-4"><span className="font-black text-gray-900 text-xl tracking-tighter">₹{item.price}</span><button disabled={!item.inStock} onClick={() => addToCart(item)} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${item.inStock ? 'bg-blue-600 text-white shadow-xl hover:bg-gray-900 active:scale-90' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}><Plus size={24} /></button></div>
+                <div className="flex items-center justify-between mt-auto pt-4"><span className="font-black text-gray-900 text-xl tracking-tighter">₹{item.price}</span><button disabled={!isItemAvail} onClick={() => addToCart(item)} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${isItemAvail ? 'bg-blue-600 text-white shadow-xl hover:bg-gray-900 active:scale-90' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}><Plus size={24} /></button></div>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
 

@@ -23,7 +23,9 @@ export const EVENTS = [
       { name: 'Rulebook.pdf', url: '#' },
       { name: 'Schedule.docx', url: '#' }
     ],
-    isFeatured: true
+    isFeatured: true,
+    registrationLink: 'https://campusbuddy.app/register/uitxkiif',
+    photos: []
   },
   {
     id: 'EVT-0492',
@@ -47,7 +49,9 @@ export const EVENTS = [
       { name: 'Rulebook.pdf', url: '#' },
       { name: 'Schedule.docx', url: '#' }
     ],
-    isFeatured: false
+    isFeatured: false,
+    registrationLink: 'https://campusbuddy.app/register/codepulse',
+    photos: []
   },
   {
     id: 'EVT-0495',
@@ -67,7 +71,9 @@ export const EVENTS = [
     description: 'Learn the fundamentals of UX design and creative problem solving with industry experts.',
     location: 'Mini Auditorium',
     tags: ['Lecture', 'Design', 'UI/UX'],
-    isFeatured: true
+    isFeatured: true,
+    registrationLink: 'https://campusbuddy.app/register/designthinking',
+    photos: []
   },
   {
     id: 'EVT-0498',
@@ -87,7 +93,9 @@ export const EVENTS = [
     description: 'An advanced session on quantum bits, gates, and the future of computation.',
     location: 'Zoom (Join link in ticket)',
     tags: ['Ongoing', 'Physics', 'Computing'],
-    isFeatured: false
+    isFeatured: false,
+    registrationLink: 'https://zoom.us/j/quantum-lecture',
+    photos: []
   }
 ];
 

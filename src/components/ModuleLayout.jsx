@@ -11,7 +11,7 @@ export default function ModuleLayout({ title, subtitle, color, children, hideHea
         {/* Module Header */}
         <div className="flex items-center justify-between">
           <button 
-            onClick={() => router.push('/home')}
+            onClick={() => router.push('/user/home')}
             className={`flex items-center text-sm font-black uppercase tracking-widest transition ${isDark ? 'text-white/40 hover:text-white' : 'text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white'}`}
           >
             ← Back to Campus

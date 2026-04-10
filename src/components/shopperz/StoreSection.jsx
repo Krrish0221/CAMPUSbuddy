@@ -9,16 +9,17 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useShopperz } from '@/context/ShopperzContext';
-import { RETAIL_PRODUCTS, RETAIL_CATEGORIES } from '@/data/shopperzData';
+import { RETAIL_CATEGORIES } from '@/data/shopperzData';
 
 export default function StoreSection({ searchQuery }) {
-  const { addToCart } = useShopperz();
+  const { products, addToCart } = useShopperz();
   const [activeCategory, setActiveCategory] = useState('All');
 
-  const filteredProducts = RETAIL_PRODUCTS.filter(p => {
+  const filteredProducts = products.filter(p => {
+    const isVisible = p.isAvailable !== false;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
-    return matchesSearch && matchesCategory;
+    return isVisible && matchesSearch && matchesCategory;
   });
 
   return (

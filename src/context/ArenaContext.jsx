@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { MOCK_REGISTRATIONS, PENDING_NETWORK_REQUESTS } from '@/data/arenaData';
+import { MOCK_REGISTRATIONS, PENDING_NETWORK_REQUESTS, EVENTS } from '@/data/arenaData';
 
 const ArenaContext = createContext();
 
@@ -12,6 +12,19 @@ export function ArenaProvider({ children }) {
   const [pendingNetworkRequests, setPendingNetworkRequests] = useState(PENDING_NETWORK_REQUESTS);
   const [connections, setConnections] = useState([]);
   const [incomingSyncRequest, setIncomingSyncRequest] = useState(null);
+  const [events, setEvents] = useState(EVENTS);
+
+  const addEvent = (newEvent) => {
+    setEvents(prev => [{ ...newEvent, id: `EVT-${Math.floor(Math.random() * 9000) + 1000}` }, ...prev]);
+  };
+
+  const updateEvent = (id, updatedEvent) => {
+    setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, ...updatedEvent } : ev));
+  };
+
+  const deleteEvent = (id) => {
+    setEvents(prev => prev.filter(ev => ev.id !== id));
+  };
 
   // Simulate an incoming sync request after 10s for demo
   useEffect(() => {
@@ -140,7 +153,11 @@ export function ArenaProvider({ children }) {
       acceptSyncRequest,
       declineSyncRequest,
       clearNotifications,
-      setSentRequests
+      setSentRequests,
+      events,
+      addEvent,
+      updateEvent,
+      deleteEvent
     }}>
       {children}
     </ArenaContext.Provider>
