@@ -96,7 +96,9 @@ export default function CaffinityPage() {
   const cartTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  const handleCheckout = () => {
+   const handleCheckout = () => {
+    if (cartTotal === 0) return;
+    
     // UPI Redirect Simulation
     if (paymentMethod === 'UPI') {
       setIsUPIRedirecting(true);
@@ -378,12 +380,12 @@ export default function CaffinityPage() {
                  <div><p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Total Checkouts</p><p className="text-2xl font-black text-gray-900 tracking-tighter">₹{cartTotal}</p></div>
                  <button 
                   onClick={handleCheckout}
-                  disabled={isCheckoutProcessing}
+                  disabled={isCheckoutProcessing || cartTotal === 0}
                   className={`px-8 py-4 rounded-[20px] font-black text-base transition-all shadow-xl relative overflow-hidden flex items-center gap-3 active:scale-95 ${
-                    isCheckoutProcessing ? 'bg-gray-200 text-gray-400' : 'bg-blue-600 text-white hover:bg-gray-900'
+                    isCheckoutProcessing || cartTotal === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-gray-900'
                   }`}
                 >
-                  {isCheckoutProcessing ? 'Placing...' : paymentMethod === 'UPI' ? 'Pay via UPI' : 'Pay via Wallet'}
+                  {isCheckoutProcessing ? 'Placing...' : cartTotal === 0 ? 'Cart is Empty' : paymentMethod === 'UPI' ? 'Pay via UPI' : 'Pay via Wallet'}
                   <ChevronRight size={18} />
                 </button>
               </div>

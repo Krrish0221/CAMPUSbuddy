@@ -247,23 +247,32 @@ export default function UAssistOverlay() {
               </div>
            </div>
            
-           {/* SOFT PAYWALL (Conditionally rendered) */}
-           {queryCount >= queryLimit && !isPremium && (
-             <motion.div 
-               initial={{ y: 20, opacity: 0 }}
-               animate={{ y: 0, opacity: 1 }}
-               className="bg-slate-900 text-white p-8 rounded-[40px] space-y-6 text-center shadow-2xl border-4 border-blue-600"
-             >
-                <div className="space-y-2">
-                  <h4 className="text-xl font-black italic uppercase tracking-tighter">Query Limit Reached 😔</h4>
-                  <p className="text-[10px] font-bold text-slate-400">KU Free users get 10 high-speed AI queries per day.</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                   <button className="py-4 bg-blue-600 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/30">Go KU Prime ₹49</button>
-                   <button onClick={() => setIsOpen(false)} className="py-4 bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest">Maybe Tomorrow</button>
-                </div>
-             </motion.div>
-           )}
+           {/* SOFT PAYWALL (Now an absolute overlay) */}
+           <AnimatePresence>
+             {queryCount >= queryLimit && !isPremium && (
+               <motion.div 
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 exit={{ opacity: 0 }}
+                 className="absolute inset-0 z-50 flex items-center justify-center p-8 backdrop-blur-md bg-white/20 dark:bg-slate-900/40"
+               >
+                 <motion.div 
+                   initial={{ y: 20, scale: 0.9, opacity: 0 }}
+                   animate={{ y: 0, scale: 1, opacity: 1 }}
+                   className="bg-slate-900 text-white p-8 rounded-[40px] space-y-6 text-center shadow-2xl border-4 border-blue-600 w-full max-w-sm"
+                 >
+                    <div className="space-y-2">
+                      <h4 className="text-xl font-black italic uppercase tracking-tighter">Query Limit Reached 😔</h4>
+                      <p className="text-[10px] font-bold text-slate-400">KU Free users get 10 high-speed AI queries per day.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                       <button className="py-4 bg-blue-600 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/30">Go KU Prime ₹49</button>
+                       <button onClick={() => setIsOpen(false)} className="py-4 bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest">Maybe Tomorrow</button>
+                    </div>
+                 </motion.div>
+               </motion.div>
+             )}
+           </AnimatePresence>
         </div>
       </motion.div>
     </div>

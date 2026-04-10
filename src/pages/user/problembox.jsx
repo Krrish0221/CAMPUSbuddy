@@ -25,7 +25,7 @@ import AdminDashboard from '@/components/problembox/AdminDashboard';
 import { TICKET_CATEGORIES } from '@/data/problemData';
 
 export default function ProblemBoxPage() {
-  const { tickets, isAdminView, toggleAdmin, addTicket, upvoteTicket, suggestions, addSuggestion } = useProblemBox();
+  const { tickets, isAdminView, toggleAdmin, addTicket, upvoteTicket, suggestions, addSuggestion, upvoteSuggestion } = useProblemBox();
   const [activeTab, setActiveTab] = useState('My Tickets');
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -279,9 +279,12 @@ export default function ProblemBoxPage() {
                          </div>
                          <div className="flex items-center gap-3">
                             <span className="text-xs font-black text-red-600">{s.upvotes}</span>
-                            <button className="w-10 h-10 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-red-600 hover:text-white transition-all">
-                               ▲
-                            </button>
+                            <button 
+                               onClick={() => upvoteSuggestion(s.id)}
+                               className="w-10 h-10 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-red-600 hover:text-white transition-all shadow-sm active:scale-95"
+                             >
+                                ▲
+                             </button>
                          </div>
                        </motion.div>
                      ))}

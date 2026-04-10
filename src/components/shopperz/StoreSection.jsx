@@ -75,44 +75,59 @@ export default function StoreSection({ searchQuery }) {
                <div className="absolute inset-0 bg-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
 
-            <div className="p-6 space-y-4">
-               <div>
-                  <div className="flex justify-between items-start">
-                    <h5 className="font-syne font-black text-sm uppercase italic tracking-tighter leading-none group-hover:text-orange-600 transition-colors">{product.name}</h5>
-                    <div className="flex items-center gap-1 text-slate-400">
-                       <Star size={10} fill={product.rating > 4.5 ? "#FF9500" : "transparent"} className={product.rating > 4.5 ? "text-orange-500" : ""} />
-                       <span className="text-[9px] font-black">{product.rating}</span>
-                    </div>
-                  </div>
-                  <p className="text-[9px] font-black text-orange-600 uppercase tracking-widest mt-2">₹{product.price}</p>
-               </div>
+   const [isAdded, setIsAdded] = useState(false);
 
-               {/* Bulk Deal Card (DuoSync Integration) */}
-               {product.bulkDeal && (
-                 <div className="p-3 bg-orange-50 dark:bg-orange-600/10 border border-orange-100 dark:border-orange-600/20 rounded-2xl flex items-center justify-between group/deal cursor-pointer hover:bg-orange-100 transition-all">
-                    <div className="flex items-center gap-2">
-                       <Users size={12} className="text-orange-600" />
-                       <p className="text-[8px] font-black uppercase tracking-widest text-orange-700 dark:text-orange-400">Group Deal: Buy {product.bulkDeal.min}+ → ₹{product.bulkDeal.price}</p>
-                    </div>
-                    <ChevronRight size={10} className="text-orange-300 group-hover/deal:translate-x-1 transition-transform" />
-                 </div>
-               )}
+   const handleAdd = () => {
+      if (product.stockCount > 0) {
+         addToCart(product);
+         setIsAdded(true);
+         setTimeout(() => setIsAdded(false), 2000);
+      }
+   };
 
-               <button 
-                  onClick={() => product.stockCount > 0 ? addToCart(product) : null}
-                  className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 transition-all ${
-                     product.stockCount === 0 
-                     ? 'bg-slate-100 dark:bg-white/5 text-slate-400' 
-                     : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white active:scale-95'
-                  }`}
-               >
-                  {product.stockCount === 0 ? (
-                    <><Bell size={14} /> Notify Me</>
-                  ) : (
-                    <><ShoppingCart size={14} /> Add to Cart</>
-                  )}
-               </button>
-            </div>
+   return (
+     <div className="p-6 space-y-4 text-left">
+        <div>
+           <div className="flex justify-between items-start">
+             <h5 className="font-syne font-black text-sm uppercase italic tracking-tighter leading-none group-hover:text-orange-600 transition-colors">{product.name}</h5>
+             <div className="flex items-center gap-1 text-slate-400">
+                <Star size={10} fill={product.rating > 4.5 ? "#FF9500" : "transparent"} className={product.rating > 4.5 ? "text-orange-500" : ""} />
+                <span className="text-[9px] font-black">{product.rating}</span>
+             </div>
+           </div>
+           <p className="text-[9px] font-black text-orange-600 uppercase tracking-widest mt-2">₹{product.price}</p>
+        </div>
+
+        {/* Bulk Deal Card (DuoSync Integration) */}
+        {product.bulkDeal && (
+          <div className="p-3 bg-orange-50 dark:bg-orange-600/10 border border-orange-100 dark:border-orange-600/20 rounded-2xl flex items-center justify-between group/deal cursor-pointer hover:bg-orange-100 transition-all">
+             <div className="flex items-center gap-2">
+                <Users size={12} className="text-orange-600" />
+                <p className="text-[8px] font-black uppercase tracking-widest text-orange-700 dark:text-orange-400">Group Deal: Buy {product.bulkDeal.min}+ → ₹{product.bulkDeal.price}</p>
+             </div>
+             <ChevronRight size={10} className="text-orange-300 group-hover/deal:translate-x-1 transition-transform" />
+          </div>
+        )}
+
+        <button 
+           onClick={handleAdd}
+           className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 transition-all ${
+              product.stockCount === 0 
+              ? 'bg-slate-100 dark:bg-white/5 text-slate-400' 
+              : isAdded 
+                ? 'bg-green-500 text-white shadow-lg'
+                : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white active:scale-95'
+           }`}
+        >
+           {product.stockCount === 0 ? (
+             <><Bell size={14} /> Notify Me</>
+           ) : isAdded ? (
+             <><CheckCircle2 size={14} /> Added!</>
+           ) : (
+             <><ShoppingCart size={14} /> Add to Cart</>
+           )}
+        </button>
+     </div>
           </motion.div>
         ))}
       </div>

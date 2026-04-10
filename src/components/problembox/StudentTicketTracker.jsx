@@ -15,7 +15,7 @@ import {
 import { useProblemBox } from '@/context/ProblemBoxContext';
 
 export default function StudentTicketTracker({ ticket }) {
-  const { upvoteTicket } = useProblemBox();
+  const { upvoteTicket, reopenTicket } = useProblemBox();
 
   if (!ticket) return null;
 
@@ -149,7 +149,10 @@ export default function StudentTicketTracker({ ticket }) {
                </div>
 
                <div className="pt-8 border-t border-green-500/20 flex gap-4">
-                 <button className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
+                 <button 
+                   onClick={() => reopenTicket(ticket.id)}
+                   className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-95"
+                 >
                    <RefreshCcw size={14} /> Reopen Issue
                  </button>
                </div>

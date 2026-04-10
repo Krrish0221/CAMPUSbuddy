@@ -53,6 +53,28 @@ export function ProblemBoxProvider({ children }) {
     if (window.navigator.vibrate) window.navigator.vibrate(50);
   };
 
+  const reopenTicket = (id) => {
+    setTickets(prev => prev.map(t => {
+      if (t.id === id) {
+        const resetTimeline = t.timeline.map((step, idx) => ({
+          ...step,
+          completed: idx === 0,
+          active: idx === 0,
+          time: idx === 0 ? 'Reopened' : 'Pending'
+        }));
+        return { 
+          ...t, 
+          status: 'Raised', 
+          timeline: resetTimeline, 
+          officialResponse: null,
+          resolution: null,
+          hasResolvedViewed: false
+        };
+      }
+      return t;
+    }));
+  };
+
   const updateTicketStatus = (id, newStatus, extraData = {}) => {
     setTickets(prev => prev.map(t => {
       if (t.id === id) {
@@ -96,6 +118,13 @@ export function ProblemBoxProvider({ children }) {
     }, ...prev]);
   };
 
+  const upvoteSuggestion = (id) => {
+    setSuggestions(prev => prev.map(s => 
+      s.id === id ? { ...s, upvotes: s.upvotes + 1 } : s
+    ));
+    if (window.navigator.vibrate) window.navigator.vibrate(50);
+  };
+
   return (
     <ProblemBoxContext.Provider value={{
       tickets,
@@ -109,7 +138,9 @@ export function ProblemBoxProvider({ children }) {
       addAdminResponse,
       assignTicket,
       suggestions,
-      addSuggestion
+      addSuggestion,
+      upvoteSuggestion,
+      reopenTicket
     }}>
       {children}
     </ProblemBoxContext.Provider>

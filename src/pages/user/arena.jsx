@@ -48,7 +48,8 @@ function ArenaContent() {
     acceptSyncRequest,
     declineSyncRequest,
     clearNotifications,
-    setSentRequests
+    setSentRequests,
+    events
   } = useArena();
 
   const [activeCategory, setActiveCategory] = useState('All');
