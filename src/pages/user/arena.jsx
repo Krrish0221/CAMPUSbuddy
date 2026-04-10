@@ -49,7 +49,7 @@ function ArenaContent() {
     declineSyncRequest,
     clearNotifications,
     setSentRequests,
-    events
+    arenaEvents
   } = useArena();
 
   const [activeCategory, setActiveCategory] = useState('All');
@@ -63,7 +63,7 @@ function ArenaContent() {
 
   const friendScrollRef = useRef(null);
 
-  const featuredEvents = useMemo(() => events.filter(e => e.isFeatured), [events]);
+  const featuredEvents = useMemo(() => arenaEvents.filter(e => e.isFeatured), [arenaEvents]);
 
   // Auto-carousel logic
   useEffect(() => {
@@ -81,7 +81,7 @@ function ArenaContent() {
         event.organizer.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, searchQuery, events]);
+  }, [activeCategory, searchQuery, arenaEvents]);
 
   const scrollFriends = (direction) => {
     if (friendScrollRef.current) {
@@ -531,7 +531,7 @@ function ArenaContent() {
                 <div className="space-y-4">
                   <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">You might also like</h4>
                   <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none">
-                    {events.filter(e => e.id !== selectedEvent.id).map(event => (
+                    {arenaEvents.filter(e => e.id !== selectedEvent.id).map(event => (
                       <div
                         key={event.id}
                         onClick={() => setSelectedEvent(event)}
@@ -755,10 +755,6 @@ function ArenaContent() {
 }
 
 export default function ArenaPage() {
-  return (
-    <ArenaProvider>
-      <ArenaContent />
-    </ArenaProvider>
-  );
+  return <ArenaContent />;
 }
 

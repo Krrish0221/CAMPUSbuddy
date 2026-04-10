@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { MOCK_REGISTRATIONS, PENDING_NETWORK_REQUESTS, EVENTS } from '@/data/arenaData';
 
 const ArenaContext = createContext();
@@ -12,18 +12,18 @@ export function ArenaProvider({ children }) {
   const [pendingNetworkRequests, setPendingNetworkRequests] = useState(PENDING_NETWORK_REQUESTS);
   const [connections, setConnections] = useState([]);
   const [incomingSyncRequest, setIncomingSyncRequest] = useState(null);
-  const [events, setEvents] = useState(EVENTS);
+  const [arenaEvents, setArenaEvents] = useState(EVENTS || []);
 
   const addEvent = (newEvent) => {
-    setEvents(prev => [{ ...newEvent, id: `EVT-${Math.floor(Math.random() * 9000) + 1000}` }, ...prev]);
+    setArenaEvents(prev => [{ ...newEvent, id: `EVT-${Math.floor(Math.random() * 9000) + 1000}` }, ...prev]);
   };
 
   const updateEvent = (id, updatedEvent) => {
-    setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, ...updatedEvent } : ev));
+    setArenaEvents(prev => prev.map(ev => ev.id === id ? { ...ev, ...updatedEvent } : ev));
   };
 
   const deleteEvent = (id) => {
-    setEvents(prev => prev.filter(ev => ev.id !== id));
+    setArenaEvents(prev => prev.filter(ev => ev.id !== id));
   };
 
   // Simulate an incoming sync request after 10s for demo
@@ -134,31 +134,36 @@ export function ArenaProvider({ children }) {
 
   const clearNotifications = () => setNotifications([]);
 
+  const value = useMemo(() => ({
+    registrations,
+    sentRequests,
+    activeTeamTier,
+    setActiveTeamTier,
+    notifications,
+    activeTab,
+    setActiveTab,
+    pendingNetworkRequests,
+    connections,
+    incomingSyncRequest,
+    rsvpToEvent,
+    sendTeamRequest,
+    acceptNetworkRequest,
+    declineNetworkRequest,
+    acceptSyncRequest,
+    declineSyncRequest,
+    clearNotifications,
+    setSentRequests,
+    arenaEvents,
+    addEvent,
+    updateEvent,
+    deleteEvent
+  }), [
+    registrations, sentRequests, activeTeamTier, notifications, activeTab, 
+    pendingNetworkRequests, connections, incomingSyncRequest, arenaEvents
+  ]);
+
   return (
-    <ArenaContext.Provider value={{
-      registrations,
-      sentRequests,
-      activeTeamTier,
-      setActiveTeamTier,
-      notifications,
-      activeTab,
-      setActiveTab,
-      pendingNetworkRequests,
-      connections,
-      incomingSyncRequest,
-      rsvpToEvent,
-      sendTeamRequest,
-      acceptNetworkRequest,
-      declineNetworkRequest,
-      acceptSyncRequest,
-      declineSyncRequest,
-      clearNotifications,
-      setSentRequests,
-      events,
-      addEvent,
-      updateEvent,
-      deleteEvent
-    }}>
+    <ArenaContext.Provider value={value}>
       {children}
     </ArenaContext.Provider>
   );

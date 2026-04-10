@@ -149,12 +149,17 @@ export default function PrintSection() {
                          </div>
                          <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5"><Zap size={10} className={priority ? 'text-orange-500' : ''} /> Priority Print (₹50)</p>
                       </div>
-                      <button 
-                        onClick={submitJob}
-                        className="w-full md:w-auto px-10 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white transition-all transform hover:-translate-y-1"
-                      >
-                         Send to Print Queue →
-                      </button>
+                    <button 
+                         onClick={submitJob}
+                         disabled={!file}
+                         className={`w-full md:w-auto px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all transform hover:-translate-y-1 ${
+                           !file 
+                           ? 'bg-slate-200 dark:bg-white/5 text-slate-400 cursor-not-allowed' 
+                           : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white'
+                         }`}
+                       >
+                          {file ? 'Send to Print Queue →' : 'Select a File First'}
+                       </button>
                    </div>
                 </div>
              </div>

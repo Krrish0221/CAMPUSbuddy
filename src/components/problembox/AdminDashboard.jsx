@@ -175,7 +175,10 @@ export default function AdminDashboard() {
                       <div className="flex items-start justify-between">
                          <span className="text-[10px] font-black text-slate-500 tracking-widest uppercase bg-slate-50 dark:bg-slate-950 px-3 py-1 rounded-full border border-slate-200 dark:border-white/5">#{ticket.id}</span>
                          <div className="flex items-center gap-2">
-                           <button className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-500 hover:text-red-500 dark:hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+                           <button 
+                             onClick={(e) => { e.stopPropagation(); if(window.confirm('Delete this ticket?')) console.log('Deleting', ticket.id); }}
+                             className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-500 hover:text-red-500 dark:hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                           >
                               <Trash2 size={12} />
                            </button>
                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white shadow-xl ${
@@ -212,7 +215,7 @@ export default function AdminDashboard() {
                               const nextStatus = col.id === 'Raised' ? 'Triaged' : col.id === 'Triaged' ? 'InProgress' : 'Resolved';
                               handleAdvance(ticket, nextStatus);
                             }}
-                            className="w-full py-3.5 bg-blue-600 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1 shadow-lg shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all"
+                            className="w-full py-3.5 bg-blue-600 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1 shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-blue-600/40 active:scale-95 transition-all"
                           >
                              Advance <ArrowRight size={10} />
                           </button>

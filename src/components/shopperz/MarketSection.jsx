@@ -17,11 +17,110 @@ import {
 import { useShopperz } from '@/context/ShopperzContext';
 import { MARKET_CATEGORIES } from '@/data/shopperzData';
 
+function MarketItemCard({ item, idx, reserveItem }) {
+  const [isReserving, setIsReserving] = useState(false);
+  const [isReserved, setIsReserved] = useState(item.reservedBy);
+
+  const handleReserve = () => {
+    if (!isReserving && !isReserved) {
+      setIsReserving(true);
+      // Simulating a small delay before final confirmation/action
+      setTimeout(() => {
+        reserveItem(item.id, 'user-123');
+        setIsReserved(true);
+        setIsReserving(false);
+      }, 800);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ y: 20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: idx * 0.1 }}
+      className={`group bg-white dark:bg-slate-900 rounded-[40px] border p-6 flex flex-col md:flex-row gap-6 hover:shadow-2xl transition-all ${
+        isReserved ? 'border-orange-600/50 bg-orange-50/5 dark:bg-orange-600/5' : 'border-slate-100 dark:border-white/5'
+      }`}
+    >
+      <div className="relative w-full md:w-32 aspect-square md:aspect-auto rounded-3xl overflow-hidden bg-slate-100 shrink-0">
+        <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+        {isReserved && (
+          <div className="absolute inset-0 bg-orange-600/40 backdrop-blur-sm flex items-center justify-center">
+            <Clock className="text-white animate-spin-slow" size={24} />
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 space-y-4">
+        <div>
+          <div className="flex justify-between items-start">
+            <div>
+              <h4 className="font-syne font-black text-sm uppercase italic tracking-tighter leading-tight group-hover:text-orange-600 transition-colors">{item.title}</h4>
+              <div className="flex items-center gap-2 mt-2">
+                <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${
+                  item.condition === 'Like New' ? 'bg-green-100 text-green-600 dark:bg-green-600/20' : 
+                  item.condition === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-600/20' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {item.condition}
+                </span>
+                {item.negotiable && (
+                  <span className="px-2 py-0.5 bg-slate-100 dark:bg-white/5 text-slate-400 rounded-lg text-[8px] font-black uppercase tracking-widest">Negotiable</span>
+                )}
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-syne font-black text-slate-900 dark:text-white">₹{item.price}</p>
+              {item.originalPrice && <p className="text-[9px] font-bold text-slate-400 line-through">₹{item.originalPrice}</p>}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6 pt-4 border-t border-slate-50 dark:border-white/5 text-[9px] font-black uppercase tracking-widest text-slate-400">
+          <div className="flex items-center gap-2">
+            <Clock size={12} className="text-slate-400" />
+            <span>Posted by {item.seller}</span>
+          </div>
+          {item.semester && (
+            <div className="flex items-center gap-2">
+              <Tag size={12} className="text-slate-400" />
+              <span>Sem {item.semester}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-3 mt-auto">
+          <button 
+            onClick={handleReserve}
+            disabled={isReserved || isReserving}
+            className={`flex-1 py-3 rounded-2xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all ${
+              isReserved 
+              ? 'bg-orange-600 text-white' 
+              : isReserving
+                ? 'bg-slate-200 dark:bg-white/10 text-slate-500 animate-pulse'
+                : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white active:scale-95'
+            }`}
+          >
+            {isReserved ? (
+              <><Clock size={12} /> Reserved</>
+            ) : isReserving ? (
+              <>Processing...</>
+            ) : (
+              <>I Want This <ChevronRight size={12} /></>
+            )}
+          </button>
+          <button className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-orange-600 hover:bg-orange-600/10 transition-all">
+            <MessageSquare size={16} />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function MarketSection({ searchQuery }) {
   const { marketListings, reserveItem } = useShopperz();
   const [activeCategory, setActiveCategory] = useState('All');
   const [showModal, setShowModal] = useState(false);
-  const [statusMessage, setStatusMessage] = useState(null);
   const [sortByPrice, setSortByPrice] = useState('none'); // 'none' | 'asc' | 'desc'
 
   const filteredListings = marketListings
@@ -36,14 +135,6 @@ export default function MarketSection({ searchQuery }) {
       return 0;
     });
 
-  const handleReserve = (item) => {
-    if (window.confirm(`Are you sure you want to reserve "${item.title}"? \n\nThis will lock the item for 2 hours while you connect with ${item.seller}.`)) {
-      reserveItem(item.id, 'user-123');
-      setStatusMessage(`Success! Connecting you to ${item.seller}...`);
-      setTimeout(() => setStatusMessage(null), 5000);
-    }
-  };
-
   const toggleSort = () => {
     setSortByPrice(prev => prev === 'asc' ? 'desc' : 'asc');
   };
@@ -51,23 +142,6 @@ export default function MarketSection({ searchQuery }) {
   return (
     <div className="space-y-8 pb-20 relative">
       
-      {/* Toast Notification Simulation */}
-      <AnimatePresence>
-        {statusMessage && (
-          <motion.div 
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -50, opacity: 0 }}
-            className="fixed top-24 left-1/2 -translate-x-1/2 z-[3000] bg-slate-900 border border-orange-600 text-white px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-4"
-          >
-            <div className="w-8 h-8 bg-orange-600 rounded-xl flex items-center justify-center">
-              <CheckCircle2 size={16} />
-            </div>
-            <p className="text-[10px] font-black uppercase tracking-widest">{statusMessage}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Filters Row */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none w-full md:w-auto">
@@ -108,82 +182,12 @@ export default function MarketSection({ searchQuery }) {
       {/* Listings List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredListings.map((item, idx) => (
-          <motion.div
-            key={item.id}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: idx * 0.1 }}
-            className={`group bg-white dark:bg-slate-900 rounded-[40px] border p-6 flex flex-col md:flex-row gap-6 hover:shadow-2xl transition-all ${
-              item.reservedBy ? 'border-orange-600/50 bg-orange-50/5 dark:bg-orange-600/5' : 'border-slate-100 dark:border-white/5'
-            }`}
-          >
-            <div className="relative w-full md:w-32 aspect-square md:aspect-auto rounded-3xl overflow-hidden bg-slate-100 shrink-0">
-               <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-               {item.reservedBy && (
-                 <div className="absolute inset-0 bg-orange-600/40 backdrop-blur-sm flex items-center justify-center">
-                    <Clock className="text-white animate-spin-slow" size={24} />
-                 </div>
-               )}
-            </div>
-
-            <div className="flex-1 space-y-4">
-               <div>
-                  <div className="flex justify-between items-start">
-                     <div>
-                        <h4 className="font-syne font-black text-sm uppercase italic tracking-tighter leading-tight group-hover:text-orange-600 transition-colors">{item.title}</h4>
-                        <div className="flex items-center gap-2 mt-2">
-                           <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-                             item.condition === 'Like New' ? 'bg-green-100 text-green-600 dark:bg-green-600/20' : 
-                             item.condition === 'Good' ? 'bg-blue-100 text-blue-600 dark:bg-blue-600/20' : 'bg-slate-100 text-slate-500'
-                           }`}>
-                             {item.condition}
-                           </span>
-                           {item.negotiable && (
-                             <span className="px-2 py-0.5 bg-slate-100 dark:bg-white/5 text-slate-400 rounded-lg text-[8px] font-black uppercase tracking-widest">Negotiable</span>
-                           )}
-                        </div>
-                     </div>
-                     <div className="text-right">
-                        <p className="text-lg font-syne font-black text-slate-900 dark:text-white">₹{item.price}</p>
-                        {item.originalPrice && <p className="text-[9px] font-bold text-slate-400 line-through">₹{item.originalPrice}</p>}
-                     </div>
-                  </div>
-               </div>
-
-               <div className="flex items-center gap-6 pt-4 border-t border-slate-50 dark:border-white/5 text-[9px] font-black uppercase tracking-widest text-slate-400">
-                  <div className="flex items-center gap-2">
-                     <Clock size={12} className="text-slate-400" />
-                     <span>Posted by {item.seller}</span>
-                  </div>
-                  {item.semester && (
-                    <div className="flex items-center gap-2">
-                       <Tag size={12} className="text-slate-400" />
-                       <span>Sem {item.semester}</span>
-                    </div>
-                  )}
-               </div>
-
-               <div className="flex gap-3 mt-auto">
-                  <button 
-                    onClick={() => !item.reservedBy && handleReserve(item)}
-                    className={`flex-1 py-3 rounded-2xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all ${
-                      item.reservedBy 
-                      ? 'bg-orange-600 text-white' 
-                      : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white'
-                    }`}
-                  >
-                     {item.reservedBy ? (
-                       <><Clock size={12} /> Reserved</>
-                     ) : (
-                       <>I Want This <ChevronRight size={12} /></>
-                     )}
-                  </button>
-                  <button className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-orange-600 hover:bg-orange-600/10 transition-all">
-                     <MessageSquare size={16} />
-                  </button>
-               </div>
-            </div>
-          </motion.div>
+          <MarketItemCard 
+            key={item.id} 
+            item={item} 
+            idx={idx} 
+            reserveItem={reserveItem} 
+          />
         ))}
       </div>
 

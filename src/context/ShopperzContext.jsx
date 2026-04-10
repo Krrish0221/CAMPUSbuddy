@@ -106,5 +106,9 @@ export function ShopperzProvider({ children }) {
 }
 
 export function useShopperz() {
-  return useContext(ShopperzContext);
+  const context = useContext(ShopperzContext);
+  if (!context) {
+    throw new Error('useShopperz must be used within a ShopperzProvider');
+  }
+  return context;
 }
