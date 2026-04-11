@@ -114,16 +114,15 @@ export default function StudentTicketTracker({ ticket }) {
                </div>
              </div>
              <button 
-                onClick={(e) => { e.stopPropagation(); upvoteTicket(ticket.id); }}
-                disabled={ticket.hasUpvoted}
-                className={`px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
-                  ticket.hasUpvoted 
-                  ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' 
-                  : 'bg-blue-600 text-white hover:bg-slate-800 hover:shadow-xl hover:shadow-blue-600/30'
-                }`}
-              >
-                {ticket.hasUpvoted ? '✓ Upvoted' : '+ I have this too'}
-              </button>
+               onClick={() => upvoteTicket(ticket.id)}
+               className={`px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
+                 ticket.hasUpvoted 
+                 ? 'bg-green-600 text-white scale-95 shadow-lg shadow-green-600/20' 
+                 : 'bg-blue-600 text-white hover:bg-white hover:text-slate-900 shadow-xl shadow-blue-600/20'
+               }`}
+             >
+               {ticket.hasUpvoted ? '✓ Upvoted' : '+ I have this too'}
+             </button>
            </div>
 
            {/* RESOLUTION BOX */}
@@ -151,11 +150,11 @@ export default function StudentTicketTracker({ ticket }) {
 
                <div className="pt-8 border-t border-green-500/20 flex gap-4">
                  <button 
-                    onClick={(e) => { e.stopPropagation(); reopenTicket(ticket.id); }}
-                    className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-95 shadow-xl"
-                  >
-                    <RefreshCcw size={14} /> Reopen Issue
-                  </button>
+                   onClick={() => reopenTicket(ticket.id)}
+                   className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-95"
+                 >
+                   <RefreshCcw size={14} /> Reopen Issue
+                 </button>
                </div>
              </motion.div>
            )}

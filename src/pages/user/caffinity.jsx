@@ -111,14 +111,20 @@ export default function CaffinityPage() {
     }
   };
 
-  const processFinalOrder = () => {
+  const processFinalOrder = async () => {
     setIsCheckoutProcessing(true);
-    setTimeout(() => {
-      const order = placeOrder(scheduledTime, paymentMethod);
-      setTrackingOrderId(order.id);
+    try {
+      const order = await placeOrder(scheduledTime, paymentMethod);
+      if (order) {
+        setTrackingOrderId(order.id);
+        setIsCartOpen(false);
+      }
+    } catch (error) {
+      console.error("Order placement failed:", error);
+      // You could add an error state here to show a toast/notification
+    } finally {
       setIsCheckoutProcessing(false);
-      setIsCartOpen(false);
-    }, 1500);
+    }
   };
 
   const currentOrder = orders.find(o => o.id === trackingOrderId);

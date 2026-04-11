@@ -1,17 +1,71 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { RETAIL_PRODUCTS, MARKET_LISTINGS } from '@/data/shopperzData';
+import { 
+  getShopperzRetail, 
+  getShopperzMarket, 
+  placeShopperzOrder, 
+  reserveMarketItem, 
+  submitPrintJob, 
+  getPrintJobs,
+  getUserProfile 
+} from '@/routes/user';
 
 const ShopperzContext = createContext();
 
 export function ShopperzProvider({ children }) {
   const [activeSection, setActiveSection] = useState('store'); // 'store' | 'print' | 'market'
-  const [products, setProducts] = useState(RETAIL_PRODUCTS.map(p => ({ ...p, isAvailable: p.stockCount > 0 })));
+  const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [printJobs, setPrintJobs] = useState([]);
-  const [marketListings, setMarketListings] = useState(MARKET_LISTINGS);
+  const [marketListings, setMarketListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isExamSeason, setIsExamSeason] = useState(true);
+  const [user, setUser] = useState(null);
 
-  // 0. RETAIL PRODUCT MANAGEMENT
+  // 0. LOAD DATA FROM BACKEND
+  useEffect(() => {
+    loadRetail();
+    loadMarket();
+    loadPrintJobs();
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    try {
+      const res = await getUserProfile();
+      if (res.success) setUser(res.data);
+    } catch (e) {
+      console.error('Error loading user profile');
+    }
+  };
+
+  const loadPrintJobs = async () => {
+    try {
+      const res = await getPrintJobs();
+      if (res.success) setPrintJobs(res.data);
+    } catch (e) {
+      console.error('Error loading print jobs');
+    }
+  };
+
+  const loadRetail = async () => {
+    try {
+      const res = await getShopperzRetail();
+      if (res.success) setProducts(res.data);
+    } catch (e) {
+      console.error('Error loading retail data');
+    }
+  };
+
+  const loadMarket = async () => {
+    try {
+      const res = await getShopperzMarket();
+      if (res.success) setMarketListings(res.data);
+    } catch (e) {
+      console.error('Error loading market data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const addProduct = (product) => {
     const newProduct = {
       id: `rp-${Math.floor(Math.random() * 9000) + 1000}`,
@@ -46,19 +100,38 @@ export function ShopperzProvider({ children }) {
     setCart(prev => prev.filter(item => item.id !== productId));
   };
 
+  const checkout = async (total) => {
+    try {
+       const orderItems = cart.map(item => ({ id: item.id, quantity: item.quantity }));
+       const res = await placeShopperzOrder({ items: orderItems, total });
+       if (res.success) {
+         setCart([]);
+         loadRetail(); // Refresh stock levels
+         return true;
+       }
+    } catch (e) {
+      console.error('Checkout failed');
+    }
+    return false;
+  };
+
   // 2. PRINT LOGIC
-  const addPrintJob = (job) => {
-    const newJob = {
-      id: `PRN-${Math.floor(Math.random() * 9000) + 1000}`,
-      status: 'Queued',
-      uploadedAt: new Date(),
-      ...job
-    };
-    setPrintJobs(prev => [newJob, ...prev]);
-    
-    // Simulate Status Updates
-    setTimeout(() => updateJobStatus(newJob.id, 'Printing'), 5000);
-    setTimeout(() => updateJobStatus(newJob.id, 'Ready'), 15000);
+  const addPrintJob = async (job) => {
+    try {
+      const res = await submitPrintJob({
+        name: job.name,
+        pages: job.pages,
+        type: job.type || 'bw',
+        cost: job.cost
+      });
+      if (res.success) {
+        loadPrintJobs();
+        return true;
+      }
+    } catch (e) {
+      console.error('Print job submission failed');
+    }
+    return false;
   };
 
   const updateJobStatus = (jobId, status) => {
@@ -66,15 +139,17 @@ export function ShopperzProvider({ children }) {
   };
 
   // 3. MARKETPLACE LOGIC
-  const reserveItem = (itemId, studentId) => {
-    const expiry = new Date();
-    expiry.setHours(expiry.getHours() + 2);
-    
-    setMarketListings(prev => prev.map(item => 
-      item.id === itemId 
-      ? { ...item, reservedBy: studentId, reservedUntil: expiry } 
-      : item
-    ));
+  const reserveItem = async (itemId, studentId) => {
+    try {
+      const res = await reserveMarketItem(itemId, studentId);
+      if (res.success) {
+        loadMarket();
+        return true;
+      }
+    } catch (e) {
+      console.error('Reservation failed');
+    }
+    return false;
   };
 
   // 4. CLEANUP (Auto-release P2P reservations)
@@ -95,10 +170,10 @@ export function ShopperzProvider({ children }) {
     <ShopperzContext.Provider value={{
       activeSection, setActiveSection,
       products, addProduct, updateProduct, deleteProduct,
-      cart, addToCart, removeFromCart,
+      cart, addToCart, removeFromCart, checkout,
       printJobs, addPrintJob,
       marketListings, reserveItem,
-      isExamSeason
+      isExamSeason, isLoading, user
     }}>
       {children}
     </ShopperzContext.Provider>
@@ -106,9 +181,5 @@ export function ShopperzProvider({ children }) {
 }
 
 export function useShopperz() {
-  const context = useContext(ShopperzContext);
-  if (!context) {
-    throw new Error('useShopperz must be used within a ShopperzProvider');
-  }
-  return context;
+  return useContext(ShopperzContext);
 }

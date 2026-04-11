@@ -48,10 +48,13 @@ const BrandPanel = () => {
   );
 };
 
+import { login as apiLogin, register as apiRegister, verifyOtp } from '@/routes/user';
+
 export default function LoginPage() {
   // Navigation & Step State
   const [step, setStep] = useState(STEPS.SIGN_IN);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Form State
   const [email, setEmail] = useState('');
@@ -110,34 +113,72 @@ export default function LoginPage() {
     return () => clearInterval(itv);
   }, [step]);
 
-  // Redirect if logged in
-  useEffect(() => {
-    if (isLoggedIn && step !== STEPS.PROFILE && step !== STEPS.SUCCESS) {
-      router.push(redirect || '/');
-    }
-  }, [isLoggedIn, redirect, router, step]);
-
-  const handleAction = (e) => {
+  const handleAction = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMsg('');
 
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
       if (step === STEPS.SIGN_IN) {
-        login();
+        const res = await apiLogin(email, password);
+
+        if (res.status === 'success') {
+          // Pass the tokens from the JSON body to the global login handler
+          login(res.user, res.access_token, res.refresh_token);
+          
+          setTimeout(() => {
+            if (res.user?.role === 'admin') {
+              router.push('/admin/dashboard');
+            } else if (res.user?.role === 'student' || res.user?.role === 'user') {
+              router.push('/user/home');
+            } else {
+              router.push(redirect || '/');
+            }
+          }, 100);
+        }
       } else if (step === STEPS.REGISTER) {
-        setStep(STEPS.OTP_CHOICE);
+        // Validation check
+        if (!email || !password || !name) {
+          throw { message: 'Required fields missing: name, email, password' };
+        }
+        
+        const res = await apiRegister({ 
+            name, email, password, phone, course, department: dept, semester: parseInt(semester) || null, college_id: collegeId 
+          });
+        
+        if (res.status === 'success') {
+          setStep(STEPS.OTP_CHOICE);
+        }
+      } else if (step === STEPS.OTP_CHOICE) {
+         setStep(STEPS.OTP_VERIFY);
       } else if (step === STEPS.OTP_VERIFY) {
-        setStep(STEPS.SUCCESS);
-        setTimeout(() => setStep(STEPS.PASSWORD_SETUP), 2000);
-      } else if (step === STEPS.PASSWORD_SETUP) {
-        setStep(STEPS.PROFILE);
+        // 2. THE FINAL HANDSHAKE: Verify OTP
+        const res = await verifyOtp(email, otp);
+
+        if (res.status === 'success') {
+          // Success! Now we have the final tokens and user profile
+          login(res.user);
+          
+          setTimeout(() => {
+            if (res.user?.role === 'admin') {
+              router.push('/admin/dashboard');
+            } else {
+              router.push('/user/home');
+            }
+          }, 100);
+        }
       } else if (step === STEPS.PROFILE) {
-        const profileData = { name, email, phone, dept, semester, collegeId, course };
-        login(profileData);
+        // Profile update if any extra fields needed
+        // await updateProfile({ dept, semester, college_id: collegeId, course });
+        login(); 
         router.push(redirect || '/');
       }
-    }, 1200);
+    } catch (err) {
+      console.error('Login Action Error:', err);
+      setErrorMsg(err.message || err.detail || 'Something went wrong. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResend = () => {
@@ -191,6 +232,13 @@ export default function LoginPage() {
 
           <div className="glass-card p-1 dark:p-[1px] rounded-[32px] overflow-hidden">
             <div className="bg-white/80 dark:bg-slate-900/40 p-8 md:p-10 rounded-[31px]">
+              
+              {errorMsg && (
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <AlertCircle size={18} />
+                  <p className="text-xs font-bold">{errorMsg}</p>
+                </div>
+              )}
 
               <form onSubmit={handleAction} className="space-y-6">
 

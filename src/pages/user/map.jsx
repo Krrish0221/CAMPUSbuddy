@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import ModuleLayout from '@/components/ModuleLayout';
-import CampusMap from '@/components/map/CampusMap';
+import Campus3DEngine from '@/components/map/Campus3DEngine';
 import BuildingBottomSheet from '@/components/map/BuildingBottomSheet';
 import { BUILDINGS, MARKERS, FRIEND_LOCATIONS } from '@/data/mapData';
 import { useArena } from '@/context/ArenaContext';
 import { useCaffinity } from '@/context/CaffinityContext';
-import { Search, Layers, Navigation2, Scan, Zap, Users } from 'lucide-react';
+import { Search, Layers, Navigation2, Scan, Zap, Users, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MapPage() {
-  const { activeTab, setActiveTab } = useArena(); // Reuse for tab state if needed
   const { orders } = useCaffinity();
   
   const [selectedBuilding, setSelectedBuilding] = useState(null);
+  const [activeFloor, setActiveFloor] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLayers, setActiveLayers] = useState(['buildings', 'friends', 'events', 'canteen']);
   const [showLayerMenu, setShowLayerMenu] = useState(false);
@@ -36,13 +36,18 @@ export default function MapPage() {
     );
   };
 
+  const handleBuildingClick = (b) => {
+    setSelectedBuilding(b);
+    setActiveFloor(null); // Reset floor on new building selection
+  };
+
   return (
     <ModuleLayout 
       title="Campus OS Map" 
       subtitle="Interact with 3D buildings and live markers" 
       color="#3b82f6"
     >
-      <div className="relative h-[calc(100vh-200px)] w-full overflow-hidden rounded-[40px] bg-slate-900 border-4 border-slate-800 shadow-inner">
+      <div className="relative h-[calc(100vh-200px)] w-full overflow-hidden rounded-[40px] bg-[#020617] border-4 border-slate-800 shadow-inner">
         
         {/* TOP OVERLAY - SEARCH & LAYERS */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 w-full max-w-xl z-50 px-6 flex gap-3">
@@ -105,19 +110,12 @@ export default function MapPage() {
           </div>
         </div>
 
-        {/* MAP COMPONENT */}
-        <div className="w-full h-full cursor-grab active:cursor-grabbing overflow-auto custom-scrollbar">
-           <CampusMap 
-             buildings={activeLayers.includes('buildings') ? BUILDINGS : []}
-             markers={canteenMarkers.filter(m => 
-                (m.type === 'cafeteria' && activeLayers.includes('canteen')) ||
-                (m.type === 'event' && activeLayers.includes('events')) ||
-                (m.type === 'shop') ||
-                (m.type === 'problem')
-             )}
-             friends={activeLayers.includes('friends') ? FRIEND_LOCATIONS : []}
-             onBuildingClick={setSelectedBuilding}
-             activeLayer={activeLayers.includes('friends') ? 'friends' : 'all'}
+        {/* 3D ENGINE COMPONENT */}
+        <div className="w-full h-full cursor-grab active:cursor-grabbing">
+           <Campus3DEngine 
+             onBuildingClick={handleBuildingClick}
+             selectedBuildingId={selectedBuilding?.id}
+             viewInteriorFloor={activeFloor}
            />
         </div>
 
@@ -130,21 +128,32 @@ export default function MapPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={() => setSelectedBuilding(null)}
+                onClick={() => { setSelectedBuilding(null); setActiveFloor(null); }}
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm z-[90]"
               />
               <BuildingBottomSheet 
                 building={selectedBuilding} 
-                onClose={() => setSelectedBuilding(null)} 
+                activeFloor={activeFloor}
+                onFloorChange={setActiveFloor}
+                onClose={() => { setSelectedBuilding(null); setActiveFloor(null); }} 
               />
             </>
           )}
         </AnimatePresence>
 
+        {/* WATERMARK */}
+        <div className="absolute bottom-6 right-10 pointer-events-none text-right">
+          <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.5em] italic">KARNAVATI 3D ENGINE v2.0</p>
+          <p className="text-[8px] font-bold text-blue-500/30 uppercase tracking-[0.2em] mt-1 italic">Procedural Mesh Generation Active</p>
+        </div>
+
         {/* CONTROLS OVERLAY - RIGHT SIDE */}
         <div className="absolute bottom-10 right-10 z-[80] flex flex-col gap-3">
-           <button className="w-14 h-14 bg-white text-slate-900 rounded-3xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all">
-             <Navigation2 size={24} fill="currentColor" />
+           <button 
+             onClick={() => { setSelectedBuilding(null); setActiveFloor(null); }}
+             className="w-14 h-14 bg-white text-slate-900 rounded-3xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all"
+           >
+             <RotateCcw size={24} />
            </button>
         </div>
       </div>

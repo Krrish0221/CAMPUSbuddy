@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import ModuleLayout from '@/components/ModuleLayout';
 import { useShopperz } from '@/context/ShopperzContext';
 import { 
@@ -10,8 +9,9 @@ import {
   Search, 
   ShoppingCart,
   Zap,
-  Plus,
-  Trash2
+  Trash2,
+  Wallet,
+  X
 } from 'lucide-react';
 
 import StoreSection from '@/components/shopperz/StoreSection';
@@ -19,17 +19,18 @@ import PrintSection from '@/components/shopperz/PrintSection';
 import MarketSection from '@/components/shopperz/MarketSection';
 
 export default function ShopperzPage() {
-  const { activeSection, setActiveSection, cart, removeFromCart, isExamSeason } = useShopperz();
+  const { activeSection, setActiveSection, cart, removeFromCart, checkout, isExamSeason } = useShopperz();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCart, setShowCart] = useState(false);
-
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const sections = [
     { id: 'store', label: 'Campus Store', icon: <Store size={18} /> },
     { id: 'print', label: 'Cloud Print', icon: <Printer size={18} /> },
     { id: 'market', label: 'Student Market', icon: <Users size={18} /> },
   ];
+
+  const totalAmount = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
   return (
     <ModuleLayout 
@@ -99,17 +100,17 @@ export default function ShopperzPage() {
                     className="w-full pl-12 pr-4 py-4 bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-[30px] font-bold text-sm focus:border-orange-600 transition-all outline-none"
                  />
               </div>
-               <button 
+              <button 
                 onClick={() => setShowCart(true)}
-                className="relative w-14 h-14 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center text-white dark:text-slate-900 shadow-xl hover:scale-105 active:scale-95 transition-all"
-               >
-                  <ShoppingCart size={20} />
-                  {cart.length > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-orange-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border-4 border-white dark:border-slate-900 animate-in zoom-in duration-300">
-                      {cart.length}
-                    </span>
-                  )}
-               </button>
+                className="relative w-14 h-14 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center text-white dark:text-slate-900 shadow-xl"
+              >
+                 <ShoppingCart size={20} />
+                 {cart.length > 0 && (
+                   <span className="absolute -top-2 -right-2 bg-orange-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border-4 border-white dark:border-slate-900">
+                     {cart.length}
+                   </span>
+                 )}
+              </button>
            </div>
         </div>
 
@@ -154,72 +155,85 @@ export default function ShopperzPage() {
 
       </div>
 
-      {/* REFINED CART MODAL */}
+      {/* CART DRAWER */}
       <AnimatePresence>
         {showCart && (
-          <div className="fixed inset-0 z-[100] bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl flex items-center justify-center p-6">
+          <div className="fixed inset-0 z-[3000] flex justify-end">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 shadow-2xl rounded-[50px] overflow-hidden flex flex-col max-h-[80vh]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCart(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              className="relative w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl flex flex-col h-full"
             >
-              {/* Header */}
-              <div className="p-8 border-b border-slate-100 dark:border-white/5 flex items-center justify-between shrink-0">
-                <div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Your Bag</h3>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">{cart.length} Items Selected</p>
-                </div>
-                <button 
-                  onClick={() => setShowCart(false)}
-                  className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-                >
-                  <Plus size={24} className="rotate-45" />
-                </button>
+              <div className="p-8 border-b dark:border-white/10 flex items-center justify-between shrink-0">
+                 <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-orange-600 rounded-2xl flex items-center justify-center text-white">
+                      <ShoppingCart size={24} />
+                    </div>
+                    <h3 className="text-xl font-black italic uppercase tracking-tighter">Your Cart</h3>
+                 </div>
+                 <button onClick={() => setShowCart(false)} className="w-10 h-10 bg-slate-50 dark:bg-white/5 rounded-xl flex items-center justify-center text-slate-400 group hover:bg-red-500 hover:text-white transition-all">
+                   <X size={20} />
+                 </button>
               </div>
 
-              {/* Items List */}
-              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-4">
-                {cart.length > 0 ? cart.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/10 group">
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 shrink-0 relative">
-                      <Image src={item.image} fill className="object-cover" alt={item.name} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-slate-900 dark:text-white truncate text-sm">{item.name}</h4>
-                      <div className="flex items-center gap-3 mt-1">
-                        <p className="text-xs font-black text-orange-600 dark:text-orange-500">₹{item.price}</p>
-                        <span className="text-[10px] font-bold text-slate-400">Qty: {item.quantity}</span>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => removeFromCart(item.id)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                )) : (
-                  <div className="h-full flex flex-col items-center justify-center py-10 text-slate-400">
-                    <ShoppingCart size={48} strokeWidth={1} className="mb-4 opacity-20" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-center">Your bag is empty</p>
-                  </div>
-                )}
+              <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                 {cart.length === 0 ? (
+                   <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-30">
+                      <ShoppingCart size={48} />
+                      <p className="font-black italic uppercase tracking-widest text-xs">Cart is Empty</p>
+                   </div>
+                 ) : (
+                   cart.map(item => (
+                     <div key={item.id} className="flex items-center gap-4 group">
+                        <img src={item.image} className="w-16 h-16 rounded-xl object-cover" />
+                        <div className="flex-1">
+                           <h6 className="font-bold text-sm leading-tight text-slate-900 dark:text-white">{item.name}</h6>
+                           <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest mt-1">₹{item.price} × {item.quantity}</p>
+                        </div>
+                        <button 
+                          onClick={() => removeFromCart(item.id)}
+                          className="p-3 text-slate-300 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                     </div>
+                   ))
+                 )}
               </div>
 
-              {/* Footer */}
-              <div className="p-8 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/5 space-y-6 shrink-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-black text-slate-500 uppercase tracking-widest">Grand Total</span>
-                  <span className="text-3xl font-black text-slate-900 dark:text-white italic tracking-tighter">₹{cartTotal}</span>
+              {cart.length > 0 && (
+                <div className="p-8 bg-slate-50 dark:bg-white/5 space-y-6 shrink-0">
+                   <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Amount</span>
+                      <span className="text-2xl font-black italic tracking-tighter italic text-slate-900 dark:text-white">₹{totalAmount}</span>
+                   </div>
+                   <button 
+                     disabled={isProcessing}
+                     onClick={async () => {
+                       setIsProcessing(true);
+                       const success = await checkout(totalAmount);
+                       if (success) {
+                         setShowCart(false);
+                         alert("Order placed successfully! 🚀");
+                       } else {
+                         alert("Checkout failed. Check your wallet balance.");
+                       }
+                       setIsProcessing(false);
+                     }}
+                     className="w-full py-5 bg-orange-600 text-white rounded-[25px] font-black uppercase tracking-widest text-[11px] shadow-2xl flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50"
+                   >
+                      <Wallet size={18} /> {isProcessing ? "Processing..." : "Pay via Wallet"}
+                   </button>
                 </div>
-                <button 
-                  disabled={cart.length === 0}
-                  className="w-full py-5 bg-orange-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white rounded-[25px] font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all"
-                >
-                  Checkout Now
-                </button>
-              </div>
+              )}
             </motion.div>
           </div>
         )}

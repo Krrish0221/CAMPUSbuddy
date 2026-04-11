@@ -23,40 +23,72 @@ const inter = Inter({
   display: 'swap',
 });
 
+import { getUserProfile, logoutUser } from '@/routes/user';
+import { logoutAdmin } from '@/routes/admin';
+
 export const ThemeContext = createContext();
+
+// Initial state helper (to prevent hydration mismatch/flicker)
+const getInitialState = (key, fallback) => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem(key);
+    if (key === 'isLoggedIn') {
+      // With the new Bearer token flow, access_token is the ultimate source of truth
+      return !!localStorage.getItem('access_token');
+    }
+    if (key === 'userProfile' && saved) {
+      try { return JSON.parse(saved); } catch (e) { return fallback; }
+    }
+    return saved || fallback;
+  }
+  return fallback;
+};
 
 export default function App({ Component, pageProps }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(getInitialState('isLoggedIn', false));
+  const [userProfile, setUserProfile] = useState(getInitialState('userProfile', null));
+  const [userRole, setUserRole] = useState(getInitialState('userRole', 'user'));
   const [isMounted, setIsMounted] = useState(false);
 
-  // 1. Initial Load from LocalStorage
+  // 1. Initial Load & Theme Check
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    const savedAuth = localStorage.getItem('isLoggedIn');
-    const savedProfile = localStorage.getItem('userProfile');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    const defaultProfile = {
-      name: '', email: '', phone: '',
-      dept: '', semester: '', collegeId: '', course: '',
-      skills: [], certificates: [], avatar: null
-    };
-
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
       setIsDarkMode(true);
     }
-    if (savedAuth === 'true') {
-      setIsLoggedIn(true);
-    }
-    if (savedProfile) {
-      setUserProfile({ ...defaultProfile, ...JSON.parse(savedProfile) });
-    } else {
-      setUserProfile(defaultProfile);
-    }
+
+    // Check backend session to sync profile, but don't force logout immediately if we have a hint
+    checkSession();
     setIsMounted(true);
   }, []);
+
+  const checkSession = async () => {
+    try {
+      const data = await getUserProfile();
+      if (data) {
+        setIsLoggedIn(true);
+        setUserProfile(data);
+        setUserRole(data.role || 'user');
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userProfile', JSON.stringify(data));
+        localStorage.setItem('userRole', data.role || 'user');
+      }
+    } catch (err) {
+      console.log('Sync session failed:', err);
+      // Only force logout if it's a clear 401 and we aren't just in the middle of a login
+      if (err.status === 401) {
+        // If we have a hint, maybe the cookie is just slow? 
+        // We'll only logout if the hint is also false
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+          setIsLoggedIn(false);
+          localStorage.setItem('isLoggedIn', 'false');
+        }
+      }
+    }
+  };
 
   // 2. Reactive Class Management (Theme)
   useEffect(() => {
@@ -72,25 +104,48 @@ export default function App({ Component, pageProps }) {
   // 3. Auth & Profile Handlers
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
   
-  const login = (profileData = null) => {
-    setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
-    if (profileData) {
-      updateProfile(profileData);
+  const login = (userData, accessToken, refreshToken) => {
+    console.log('Executing login sequence for:', userData?.name);
+    
+    if (accessToken) {
+      localStorage.setItem('access_token', accessToken);
     }
+    if (refreshToken) {
+      localStorage.setItem('refresh_token', refreshToken);
+    }
+    
+    setIsLoggedIn(true);
+    if (userData) {
+      setUserProfile(userData);
+      const role = userData.role || 'user';
+      setUserRole(role);
+      localStorage.setItem('userProfile', JSON.stringify(userData));
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('role', role); // Matching guide
+    }
+    localStorage.setItem('isLoggedIn', 'true');
+    // Give the browser a moment to register state before syncing
+    setTimeout(() => checkSession(), 500);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await (userRole === 'admin' ? logoutAdmin() : logoutUser());
+    } catch (e) {}
     setIsLoggedIn(false);
     setUserProfile(null);
-    localStorage.setItem('isLoggedIn', 'false');
+    setUserRole('user');
     localStorage.removeItem('userProfile');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('role');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.setItem('isLoggedIn', 'false');
   };
 
   const updateProfile = (data) => {
     const newProfile = { ...userProfile, ...data };
     setUserProfile(newProfile);
-    localStorage.setItem('userProfile', JSON.stringify(newProfile));
   };
 
   if (!isMounted) return <div className="bg-white dark:bg-[#020617] min-h-screen" />;
