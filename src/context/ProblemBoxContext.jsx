@@ -1,17 +1,42 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { MOCK_TICKETS } from '@/data/problemData';
+import { getTickets, createTicket } from '@/routes/user';
 
 const ProblemBoxContext = createContext();
 
 export function ProblemBoxProvider({ children }) {
-  const [tickets, setTickets] = useState(MOCK_TICKETS);
+  const [tickets, setTickets] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [isAdminView, setIsAdminView] = useState(false);
   const [hasNewCriticalAlert, setHasNewCriticalAlert] = useState(false);
-  const [suggestions, setSuggestions] = useState([
-    { id: 1, text: "Add more trash cans near Libary entrance", upvotes: 12, time: '2h ago' },
-    { id: 2, text: "Install water coolers in A-Block 3rd floor", upvotes: 45, time: '5h ago' }
-  ]);
+  const [suggestions, setSuggestions] = useState([]);
+
+  // 1. Initial Data Fetch
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
+  const loadTickets = async () => {
+    try {
+      const res = await getTickets();
+      if (res.success) setTickets(res.data);
+    } catch (e) {
+      console.error('Error loading tickets');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addTicket = async (ticketData) => {
+    try {
+       const res = await createTicket(ticketData);
+       if (res.success) {
+         loadTickets(); // Refresh list
+       }
+    } catch (e) {
+      console.error('Error raising ticket');
+    }
+  };
 
   // Sound effect simulation
   const playPing = () => {
@@ -20,30 +45,6 @@ export function ProblemBoxProvider({ children }) {
       audio.volume = 0.3;
       // audio.play().catch(() => {}); // Browsers might block this, but logic is there
     } catch(e) {}
-  };
-
-  const addTicket = (ticketData) => {
-    const newTicket = {
-      id: `PBX-${Math.floor(Math.random() * 9000) + 1000}`,
-      ...ticketData,
-      upvotes: 0,
-      status: 'Raised',
-      aiSummary: `Analyzing issue at ${ticketData.location}... Priority auto-triaged to ${ticketData.priority || 'Medium'}.`,
-      timeline: [
-        { step: 'Raised', time: 'Just now', completed: true, active: true },
-        { step: 'Triaged', time: 'Pending', completed: false },
-        { step: 'Assigned', time: 'Pending', completed: false },
-        { step: 'In Progress', time: 'Pending', completed: false },
-        { step: 'Resolved', time: 'Pending', completed: false }
-      ],
-      createdAt: new Date().toISOString()
-    };
-
-    setTickets(prev => [newTicket, ...prev]);
-    
-    if (newTicket.priority === 'Critical') {
-      setHasNewCriticalAlert(true);
-    }
   };
 
   const upvoteTicket = (id) => {
@@ -128,6 +129,7 @@ export function ProblemBoxProvider({ children }) {
   return (
     <ProblemBoxContext.Provider value={{
       tickets,
+      isLoading,
       isAdminView,
       hasNewCriticalAlert,
       toggleAdmin,

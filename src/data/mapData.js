@@ -1,79 +1,137 @@
 export const BUILDINGS = [
   {
-    id: 'b1',
-    name: 'I-Block Engineering',
-    shortCode: 'I-BLOCK',
-    coordinates: { x: 350, y: 400 },
-    shape: 'M 300 350 L 500 350 L 500 550 L 300 550 Z', // Block shape
-    floors: ['GF', '1F', '2F', '3F'],
-    facilities: ['WiFi', 'AC', 'Projectors', 'Labs'],
-    accessLevel: 'Students Only',
+    id: "uid", 
+    name: "UID – United Institute of Design", 
+    shortCode: "UID",
+    floors: [1, 2, 3, 4, 5, 6],
+    rooms: 30, 
+    type: "academic", 
+    color: "#E8A87C", 
+    roofColor: "#C47A52",
+    x: -10, z: -60, w: 38, d: 28,
+    facilities: ['Design Studios', '3D Printers', 'Gallery', 'AC'],
+    description: "6 floors · 30 design studios & classrooms · Architecture, Fashion, Product Design",
     image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80',
-    occupancy: '75%',
     status: 'high-traffic'
   },
   {
-    id: 'b2',
-    name: 'Unitedworld Design (UID)',
-    shortCode: 'UID',
-    coordinates: { x: 700, y: 150 },
-    shape: 'M 650 100 L 850 100 L 850 300 L 650 300 Z',
-    floors: ['GF', '1F', '2F'],
-    facilities: ['Design Studios', '3D Printers', 'Gallery'],
-    accessLevel: 'Restricted',
-    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80',
-    occupancy: '40%',
+    id: "uit", 
+    name: "UIT – United Institute of Technology", 
+    shortCode: "UIT",
+    floors: [1, 2, 3, 4, 5],
+    rooms: 15, 
+    type: "academic", 
+    color: "#7EB8D4", 
+    roofColor: "#4A90B8",
+    x: 52, z: -48, w: 42, d: 32,
+    facilities: ['Engineering Labs', 'Robotics Center', 'Workshop'],
+    description: "5 floors · 15 classrooms · Engineering & Technology",
+    image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80',
     status: 'available'
   },
   {
-    id: 'b3',
-    name: 'BBA New Campus',
-    shortCode: 'BBA',
-    coordinates: { x: 400, y: 1300 }, // Positioned in Extended section
-    shape: 'M 350 1200 L 550 1200 L 550 1400 L 350 1400 Z',
-    floors: ['GF', '1F', '2F', '3F', '4F'],
-    facilities: ['Seminar Hall', 'Library', 'Startup Hub'],
-    accessLevel: 'Public',
-    image: 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?auto=format&fit=crop&w=800&q=80',
-    occupancy: '20%',
+    id: "uwsl", 
+    name: "UWSL – United World School of Law", 
+    shortCode: "UWSL",
+    floors: [1, 2, 3, 4], 
+    rooms: 20, 
+    type: "academic", 
+    color: "#9B8DC4", 
+    roofColor: "#6B5A9E",
+    x: 52, z: 10, w: 40, d: 24,
+    facilities: ['Moot Court', 'Law Library', 'Seminar Hall'],
+    description: "4 floors · 20 classrooms · Law School",
+    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
     status: 'available'
   },
   {
-    id: 'b4',
-    name: 'Faculty Hostels',
-    shortCode: 'F-HOSTEL',
-    coordinates: { x: 350, y: 750 },
-    shape: 'M 300 700 L 450 700 L 450 850 L 300 850 Z',
-    floors: ['GF', '1F', '2F', '3F'],
-    facilities: ['Residential', 'Dining', 'Garden'],
-    accessLevel: 'Restricted',
-    image: 'https://images.unsplash.com/photo-1555854817-40e073a0a544?auto=format&fit=crop&w=800&q=80',
-    occupancy: '90%',
+    id: "ksd", 
+    name: "KSD – Karnavati School of Dentistry", 
+    shortCode: "KSD",
+    floors: [1, 2, 3, 4], 
+    rooms: 25, 
+    type: "academic", 
+    color: "#72C8A0", 
+    roofColor: "#3E9E72",
+    x: 68, z: -82, w: 36, d: 24,
+    description: "4 floors · 25 labs & classrooms · Dental Sciences",
+    facilities: ['Dental Clinic', 'Anatomy Lab', 'Pathology Lab'],
+    image: 'https://images.unsplash.com/photo-1588776814546-1ffce47267a5?auto=format&fit=crop&w=800&q=80',
+    status: 'available'
+  },
+  {
+    id: "dome", 
+    name: "Dome Auditorium", 
+    shortCode: "Dome",
+    floors: [1, 2], 
+    rooms: 1, 
+    type: "special", 
+    color: "#C0C8D8", 
+    roofColor: "#8090B0",
+    x: 18, z: -55, w: 22, d: 22, isDome: true,
+    description: "Iconic dome auditorium · 1200 seat capacity",
+    facilities: ['AV System', 'Central AC', 'VVIP Lounge'],
+    image: 'https://images.unsplash.com/photo-1503023345030-a7ec3c7bb723?auto=format&fit=crop&w=800&q=80',
+    status: 'live-event'
+  },
+  {
+    id: "mess", 
+    name: "Mess / Cafeteria", 
+    shortCode: "Mess",
+    floors: [1, 2], 
+    rooms: 3, 
+    type: "facility", 
+    color: "#F0C87A", 
+    roofColor: "#C8A030",
+    x: -8, z: -28, w: 22, d: 18,
+    description: "2 floors · Cafeteria & Dining Hall",
+    facilities: ['Food Court', 'Outdoor Seating', 'Juice Bar'],
+    image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7bb741f?auto=format&fit=crop&w=800&q=80',
     status: 'high-traffic'
+  },
+  {
+    id: "gym", 
+    name: "Gymnasium", 
+    shortCode: "GYM",
+    floors: [1, 2], 
+    rooms: 4, 
+    type: "sports", 
+    color: "#A8D8A0", 
+    roofColor: "#60A858",
+    x: 16, z: 62, w: 16, d: 14,
+    description: "2 floors · Fully equipped gymnasium",
+    facilities: ['Cardio Zone', 'Strength Training', 'Yoga Room'],
+    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80',
+    status: 'available'
   }
 ];
 
 export const ROOMS = {
-  'b1': [ // I-Block
-    { id: 'I-101', name: 'Lecture Hall 1', floor: '1F', capacity: 60, status: 'Occupied', amenities: ['Projector', 'AC'], bookedBy: 'Intro to AI' },
-    { id: 'I-102', name: 'Physics Lab', floor: '1F', capacity: 30, status: 'Available', amenities: ['Lab Equipment', 'WiFi'], nextAvailable: 'Now' },
-    { id: 'I-201', name: 'AI/ML Research Lab', floor: '2F', capacity: 25, status: 'Live Event', amenities: ['GPU Servers', 'Projector'], bookedBy: 'CodePulse Hackathon' },
-    { id: 'I-301', name: 'Seminar Hall', floor: '3F', capacity: 120, status: 'Occupied', amenities: ['Stage', 'Sound System'], nextAvailable: '4 PM' }
+  'uid': [
+    { id: 'UID-101', name: 'Design Studio 1', floor: '1F', capacity: 40, status: 'Occupied', amenities: ['Plotters', 'AC'], bookedBy: 'Fashion Design 101' },
+    { id: 'UID-201', name: 'Mac Lab', floor: '2F', capacity: 30, status: 'Available', amenities: ['iMacs', 'WiFi'], nextAvailable: 'Now' }
   ],
-  'b3': [ // BBA
-    { id: 'B-101', name: 'Main Library', floor: 'GF', capacity: 200, status: 'Available', amenities: ['WiFi', 'Quiet Zone'], nextAvailable: 'Now' },
-    { id: 'B-201', name: 'Incubation Center', floor: '2F', capacity: 40, status: 'Occupied', amenities: ['Coffee', 'Whiteboards'], bookedBy: 'Pitch Deck Review' }
+  'uit': [
+    { id: 'UIT-101', name: 'CS Core Lab', floor: '1F', capacity: 60, status: 'Occupied', amenities: ['Ethernet', 'AC'], bookedBy: 'Data Structures' }
   ]
 };
 
 export const MARKERS = [
-  { id: 'm1', type: 'cafeteria', buildingId: 'b1', name: 'Main Cafeteria', coordinates: { x: 420, y: 560 }, status: 'high-traffic', pulseColor: 'red' },
-  { id: 'm2', type: 'event', buildingId: 'b1', name: 'CodePulse Hackathon', coordinates: { x: 400, y: 480 }, status: 'live-event', pulseColor: 'orange' },
-  { id: 'm3', type: 'shop', buildingId: 'b3', name: 'Morn Brew Cafe', coordinates: { x: 600, y: 1250 }, status: 'available', pulseColor: 'blue' },
-  { id: 'm4', type: 'problem', buildingId: 'b4', name: 'AC Leakage Reported', coordinates: { x: 380, y: 800 }, status: 'alert', pulseColor: 'red' }
+  { id: 'm1', type: 'cafeteria', buildingId: 'mess', name: 'Central Mess', coordinates: { x: 0, y: 0 }, status: 'high-traffic', pulseColor: 'red' },
+  { id: 'm2', type: 'event', buildingId: 'dome', name: 'Innovation Summit', coordinates: { x: 0, y: 0 }, status: 'live-event', pulseColor: 'orange' },
+  { id: 'm5', type: 'shop', buildingId: 'uit', name: 'Tech Store', coordinates: { x: 0, y: 0 }, status: 'available', pulseColor: 'blue' }
 ];
 
 export const FRIEND_LOCATIONS = [
-  { studentId: 'f1', name: 'Krish', coordinates: { x: 380, y: 420 }, buildingId: 'b1', floor: '2F', lastUpdated: '2 min ago', avatarColor: 'purple' },
-  { studentId: 'f3', name: 'Rahul', coordinates: { x: 720, y: 180 }, buildingId: 'b2', floor: 'GF', lastUpdated: 'Just now', avatarColor: 'blue' }
+  { studentId: 'f1', name: 'Krish', coordinates: { x: 0, y: 0 }, buildingId: 'uid', floor: '3F', lastUpdated: '2 min ago', avatarColor: 'purple' },
+  { studentId: 'f3', name: 'Rahul', coordinates: { x: 0, y: 0 }, buildingId: 'uit', floor: 'GF', lastUpdated: 'Just now', avatarColor: 'blue' }
 ];
+
+export const TYPE_META = {
+  academic:  { color: "#7EB8D4", label: "Academic" },
+  hostel:    { color: "#F4A6A0", label: "Hostel" },
+  facility:  { color: "#F0C87A", label: "Facility" },
+  sports:    { color: "#A8D8A0", label: "Sports" },
+  workshop:  { color: "#B8A878", label: "Workshop" },
+  special:   { color: "#C0C8D8", label: "Special" },
+};

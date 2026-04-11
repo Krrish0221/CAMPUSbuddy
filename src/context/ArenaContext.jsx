@@ -1,183 +1,248 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { MOCK_REGISTRATIONS, PENDING_NETWORK_REQUESTS, EVENTS } from '@/data/arenaData';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { 
+  getArenaEvents, 
+  getArenaRegistrations, 
+  rsvpArenaEvent, 
+  getArenaTeamSyncs, 
+  sendArenaTeamSync, 
+  updateArenaTeamSync,
+  searchStudents,
+  getUserProfile
+} from '@/routes/user';
+import { addArenaEvent } from '@/routes/admin';
 
 const ArenaContext = createContext();
 
 export function ArenaProvider({ children }) {
-  const [registrations, setRegistrations] = useState(MOCK_REGISTRATIONS);
+  const [registrations, setRegistrations] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [activeTeamTier, setActiveTeamTier] = useState('Duo');
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState('Events');
-  const [pendingNetworkRequests, setPendingNetworkRequests] = useState(PENDING_NETWORK_REQUESTS);
+  const [pendingNetworkRequests, setPendingNetworkRequests] = useState([]);
   const [connections, setConnections] = useState([]);
   const [incomingSyncRequest, setIncomingSyncRequest] = useState(null);
-  const [arenaEvents, setArenaEvents] = useState(EVENTS || []);
+  const [events, setEvents] = useState([]);
+  const [user, setUser] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const addEvent = useCallback((newEvent) => {
-    setArenaEvents(prev => [{ ...newEvent, id: `EVT-${Math.floor(Math.random() * 9000) + 1000}` }, ...prev]);
-  }, []);
-
-  const updateEvent = useCallback((id, updatedEvent) => {
-    setArenaEvents(prev => prev.map(ev => ev.id === id ? { ...ev, ...updatedEvent } : ev));
-  }, []);
-
-  const deleteEvent = useCallback((id) => {
-    setArenaEvents(prev => prev.filter(ev => ev.id !== id));
-  }, []);
-
-  // Simulate an incoming sync request after 10s for demo
+  // 1. Initial Data Fetch
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIncomingSyncRequest({
-        id: 'sync-1',
-        requester: { name: 'Krish', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80' },
-        event: { title: 'CodePulse Hackathon', banner: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=300&q=80', id: 'EVT-0492' },
-        type: 'Duo'
-      });
-    }, 15000);
-    return () => clearTimeout(timer);
+    loadProfile();
+    loadEvents();
+    loadRegistrations();
   }, []);
 
-  const rsvpToEvent = useCallback((event) => {
-    setRegistrations(prev => {
-      if (prev.some(r => r.eventId === event.id)) return prev;
-      
-      const newReg = {
-        id: `REG-${Math.floor(Math.random() * 9000) + 1000}`,
-        eventId: event.id,
-        userId: 'u1',
-        studentName: 'Rohan Sharma',
-        registeredAt: new Date().toISOString(),
-        status: 'Confirmed'
-      };
-      return [...prev, newReg];
-    });
-  }, []);
+  useEffect(() => {
+    if (user && events.length > 0) {
+      loadTeamSyncs();
+    }
+  }, [user, events]);
 
-  const acceptSyncRequest = useCallback(() => {
+  const loadProfile = async () => {
+    try {
+      const res = await getUserProfile();
+      if (res) setUser(res);
+    } catch (e) { console.error('Error loading profile'); }
+  };
+
+  const loadRegistrations = async () => {
+    try {
+      const res = await getArenaRegistrations();
+      if (res.success) setRegistrations(res.data);
+    } catch (e) { console.error('Error loading registrations'); }
+  };
+
+  const loadTeamSyncs = async () => {
+    if (!user) return;
+    try {
+      const res = await getArenaTeamSyncs();
+      if (res.success) {
+        // filter for pending requests where I am the recipient
+        const incoming = res.data.find(s => s.recipientId === user.id && s.status === 'Pending'); 
+        if (incoming) {
+          const event = events.find(e => e.id === incoming.eventId);
+          if (event) {
+            setIncomingSyncRequest({
+              ...incoming,
+              event: { title: event.title, banner: event.coverImage, id: event.id },
+              type: incoming.tier
+            });
+          }
+        }
+      }
+    } catch (e) { console.error('Error loading syncs'); }
+  };
+
+  const loadEvents = async () => {
+    try {
+      const res = await getArenaEvents();
+      if (res.success) setEvents(res.data);
+    } catch (e) {
+      console.error('Error loading events');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+   const addEvent = async (newEvent) => {
+    try {
+      const res = await addArenaEvent(newEvent);
+      if (res.success) loadEvents();
+    } catch (e) {
+      console.error('Error adding event');
+    }
+  };
+
+  const updateEvent = (id, updatedEvent) => {
+    setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, ...updatedEvent } : ev));
+  };
+
+  const deleteEvent = (id) => {
+    setEvents(prev => prev.filter(ev => ev.id !== id));
+  };
+
+  // Removed mock sync simulation
+
+  const rsvpToEvent = async (event) => {
+    if (registrations.some(r => r.eventId === event.id)) return;
+    
+    try {
+      const res = await rsvpArenaEvent({ eventId: event.id });
+      if (res) {
+        setRegistrations(prev => [...prev, res]);
+        return res;
+      }
+    } catch (e) {
+      console.error('RSVP Failed:', e);
+    }
+  };
+
+  const acceptSyncRequest = async () => {
     if (incomingSyncRequest) {
-      rsvpToEvent(incomingSyncRequest.event);
-      setIncomingSyncRequest(null);
-      
-      setNotifications(prev => {
+      try {
+        await updateArenaTeamSync(incomingSyncRequest.id, 'Accepted');
+        await rsvpToEvent(incomingSyncRequest.event);
+        setIncomingSyncRequest(null);
+        
         const notif = {
           id: Date.now(),
           type: 'incoming',
-          message: `Sync confirmed! You and Krish are now a Duo for CodePulse. 🚀`,
+          message: `Sync confirmed! You are now joined for the event. 🚀`,
           time: 'Just now'
         };
-        return [notif, ...prev];
-      });
+        setNotifications(prev => [notif, ...prev]);
+        setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== notif.id)), 5000);
+      } catch (e) { console.error('Accept Failed'); }
     }
-  }, [incomingSyncRequest, rsvpToEvent]);
+  };
 
-  const declineSyncRequest = useCallback(() => setIncomingSyncRequest(null), []);
+  const declineSyncRequest = async () => {
+    if (incomingSyncRequest) {
+      try {
+        await updateArenaTeamSync(incomingSyncRequest.id, 'Declined');
+        setIncomingSyncRequest(null);
+      } catch (e) { console.error('Decline Failed'); }
+    }
+  };
 
-  const sendTeamRequest = useCallback((friend, eventTitle) => {
-    setSentRequests(prev => {
-      if (prev.includes(friend.id)) return prev;
-      return [...prev, friend.id];
-    });
+  const sendTeamRequest = async (friend, eventId, eventTitle) => {
+    if (sentRequests.includes(friend.id)) return;
     
-    const outgoingId = Date.now();
-    // Simulate Outgoing Notification
-    setNotifications(prev => {
-      const outgoingNotif = {
-        id: outgoingId,
-        type: 'outgoing',
-        message: `Request sent to ${friend.name}'s device! 📱`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      return [outgoingNotif, ...prev];
-    });
+    try {
+      const res = await sendArenaTeamSync({
+        eventId: eventId,
+        recipientId: friend.id,
+        tier: activeTeamTier
+      });
 
-    // Auto-remove outgoing after 5s
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== outgoingId));
-    }, 5000);
-
-    // Simulate Incoming Notification on "Friend's Device" (Mock)
-    setTimeout(() => {
-      const incomingId = Date.now() + 1;
-      setNotifications(prev => {
-        const incomingNotif = {
-          id: incomingId,
-          type: 'incoming',
-          message: `${friend.name} received your request for ${eventTitle}!`,
+      if (res) {
+        setSentRequests(prev => [...prev, friend.id]);
+        
+        const outgoingId = Date.now();
+        const outgoingNotif = {
+          id: outgoingId,
+          type: 'outgoing',
+          message: `Sync request sent to ${friend.name}! 📱`,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
-        return [incomingNotif, ...prev];
-      });
-
-      // Auto-remove incoming after 5s
-      setTimeout(() => {
-        setNotifications(prev => prev.filter(n => n.id !== incomingId));
-      }, 5000);
-    }, 2000);
-  }, []);
-
-  const acceptNetworkRequest = useCallback((requestId) => {
-    setPendingNetworkRequests(prev => {
-      const request = prev.find(r => r.id === requestId);
-      if (request) {
-        setConnections(conn => [...conn, request]);
-        
-        setNotifications(notifs => {
-          const notif = {
-            id: Date.now(),
-            type: 'incoming',
-            message: `You are now connected with ${request.name}! 🤝`,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          };
-          return [notif, ...notifs];
-        });
-        
-        return prev.filter(r => r.id !== requestId);
+        setNotifications(prev => [outgoingNotif, ...prev]);
+        setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== outgoingId)), 5000);
       }
-      return prev;
-    });
-  }, []);
+    } catch (e) {
+      console.error('Sync Request Failed');
+    }
+  };
 
-  const declineNetworkRequest = useCallback((requestId) => {
+  const acceptNetworkRequest = (requestId) => {
+    const request = pendingNetworkRequests.find(r => r.id === requestId);
+    if (request) {
+      setConnections(prev => [...prev, request]);
+      setPendingNetworkRequests(prev => prev.filter(r => r.id !== requestId));
+      
+      const notif = {
+        id: Date.now(),
+        type: 'incoming',
+        message: `You are now connected with ${request.name}! 🤝`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setNotifications(prev => [notif, ...prev]);
+      setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== notif.id)), 5000);
+    }
+  };
+
+  const declineNetworkRequest = (requestId) => {
     setPendingNetworkRequests(prev => prev.filter(r => r.id !== requestId));
-  }, []);
+  };
 
-  const clearNotifications = useCallback(() => setNotifications([]), []);
+  const clearNotifications = () => setNotifications([]);
 
-  const value = useMemo(() => ({
-    registrations,
-    sentRequests,
-    activeTeamTier,
-    setActiveTeamTier,
-    notifications,
-    activeTab,
-    setActiveTab,
-    pendingNetworkRequests,
-    connections,
-    incomingSyncRequest,
-    rsvpToEvent,
-    sendTeamRequest,
-    acceptNetworkRequest,
-    declineNetworkRequest,
-    acceptSyncRequest,
-    declineSyncRequest,
-    clearNotifications,
-    setSentRequests,
-    arenaEvents,
-    addEvent,
-    updateEvent,
-    deleteEvent
-  }), [
-    registrations, sentRequests, activeTeamTier, notifications, activeTab, 
-    pendingNetworkRequests, connections, incomingSyncRequest, arenaEvents,
-    rsvpToEvent, sendTeamRequest, acceptNetworkRequest, declineNetworkRequest,
-    acceptSyncRequest, declineSyncRequest, clearNotifications, addEvent,
-    updateEvent, deleteEvent
-  ]);
+  const findTeammates = async (query) => {
+    if (!query) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await searchStudents(query);
+      if (res.success) setSearchResults(res.data);
+    } catch (e) {
+      console.error('Search failed');
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   return (
-    <ArenaContext.Provider value={value}>
+    <ArenaContext.Provider value={{
+      registrations,
+      sentRequests,
+      activeTeamTier,
+      setActiveTeamTier,
+      notifications,
+      activeTab,
+      setActiveTab,
+      pendingNetworkRequests,
+      connections,
+      incomingSyncRequest,
+      rsvpToEvent,
+      sendTeamRequest,
+      acceptNetworkRequest,
+      declineNetworkRequest,
+      acceptSyncRequest,
+      declineSyncRequest,
+      clearNotifications,
+      setSentRequests,
+      events,
+      addEvent,
+      updateEvent,
+      deleteEvent,
+      isLoading,
+      searchResults,
+      isSearching,
+      findTeammates
+    }}>
       {children}
     </ArenaContext.Provider>
   );

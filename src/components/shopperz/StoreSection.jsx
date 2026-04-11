@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Star,
-  ShoppingCart,
-  Bell,
+import { 
+  Star, 
+  ShoppingCart, 
+  Bell, 
   Users,
   ChevronRight,
   Sparkles,
@@ -12,7 +12,7 @@ import {
 import { useShopperz } from '@/context/ShopperzContext';
 import { RETAIL_CATEGORIES } from '@/data/shopperzData';
 
-function ProductCard({ product, addToCart, idx }) {
+function ProductCard({ product, idx, addToCart }) {
   const [isAdded, setIsAdded] = useState(false);
 
   const handleAdd = () => {
@@ -44,8 +44,8 @@ function ProductCard({ product, addToCart, idx }) {
       </div>
 
       <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
-        <img
-          src={product.image}
+        <img 
+          src={product.image} 
           alt={product.name}
           className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${product.stockCount === 0 ? 'grayscale opacity-50' : ''}`}
         />
@@ -74,14 +74,15 @@ function ProductCard({ product, addToCart, idx }) {
           </div>
         )}
 
-        <button
+        <button 
           onClick={handleAdd}
-          className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 transition-all ${product.stockCount === 0
-            ? 'bg-slate-100 dark:bg-white/5 text-slate-400'
-            : isAdded
+          className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 transition-all ${
+            product.stockCount === 0 
+            ? 'bg-slate-100 dark:bg-white/5 text-slate-400' 
+            : isAdded 
               ? 'bg-green-500 text-white shadow-lg'
               : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 dark:hover:text-white active:scale-95'
-            }`}
+          }`}
         >
           {product.stockCount === 0 ? (
             <><Bell size={14} /> Notify Me</>
@@ -109,17 +110,18 @@ export default function StoreSection({ searchQuery }) {
 
   return (
     <div className="space-y-8 pb-20">
-
+      
       {/* Category Pills */}
       <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-none">
         {RETAIL_CATEGORIES.map(cat => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-6 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest transition-all ${activeCategory === cat
-              ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+            className={`px-6 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest transition-all ${
+              activeCategory === cat 
+              ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' 
               : 'bg-slate-100 dark:bg-white/5 text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10'
-              }`}
+            }`}
           >
             {cat}
           </button>
@@ -129,11 +131,11 @@ export default function StoreSection({ searchQuery }) {
       {/* Product Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {filteredProducts.map((product, idx) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            addToCart={addToCart}
-            idx={idx}
+          <ProductCard 
+            key={product.id} 
+            product={product} 
+            idx={idx} 
+            addToCart={addToCart} 
           />
         ))}
       </div>

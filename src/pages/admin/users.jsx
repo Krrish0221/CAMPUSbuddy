@@ -45,9 +45,8 @@ export default function UsersAdminPage() {
   };
 
   const addLocation = () => {
-    const trimmed = locInput.trim();
-    if(trimmed && !locations.includes(trimmed)) {
-      setLocations(prev => [...prev, trimmed]);
+    if(locInput.trim() && !locations.includes(locInput.trim())) {
+      setLocations([...locations, locInput.trim()]);
       setLocInput('');
     }
   };

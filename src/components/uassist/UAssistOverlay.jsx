@@ -116,17 +116,13 @@ export default function UAssistOverlay() {
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-6 scroll-smooth">
            {messages.map((msg, i) => {
              const isAi = msg.role === 'ai';
-             const hasStructuredCards = msg.actionCard && ['food_cards', 'event_cards', 'stationery_cards'].includes(msg.actionCard.type.toLowerCase());
-
-             if (isAi && hasStructuredCards) {
+             const hasStructuredCards = isAi && ['food_cards', 'event_cards', 'stationery_cards', 'product_cards', 'REPORT', 'NAVIGATE'].includes(msg.type);
+ 
+             if (hasStructuredCards) {
                 return (
                   <UAssistMessage 
                     key={msg.id} 
-                    response={{
-                      type: msg.actionCard.type.toLowerCase(),
-                      message: msg.content,
-                      data: msg.actionCard.data
-                    }} 
+                    message={msg} 
                   />
                 );
              }

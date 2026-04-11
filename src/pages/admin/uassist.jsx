@@ -25,8 +25,6 @@ export default function UAssistAdminPage() {
   const [faqs, setFaqs] = useState(INITIAL_FAQS);
   const [activeTab, setActiveTab] = useState('Brain Config');
   const [broadcastMsg, setBroadcastMsg] = useState('');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newEntry, setNewEntry] = useState({ q: '', a: '', tags: '' });
   
   const { sendGlobalBroadcast, globalLogs } = useUAssist();
 
@@ -37,19 +35,6 @@ export default function UAssistAdminPage() {
   };
 
   const deleteFAQ = (id) => setFaqs(faqs.filter(f => f.id !== id));
-
-  const addFAQ = () => {
-    if (!newEntry.q || !newEntry.a) return;
-    const entry = {
-      id: `kb-${Math.floor(Math.random() * 9000) + 1000}`,
-      q: newEntry.q,
-      a: newEntry.a,
-      tags: newEntry.tags || 'general'
-    };
-    setFaqs([entry, ...faqs]);
-    setNewEntry({ q: '', a: '', tags: '' });
-    setShowAddModal(false);
-  };
 
   return (
     <AdminLayout 
@@ -116,12 +101,9 @@ export default function UAssistAdminPage() {
                    </h3>
                    <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">Train UAssist with custom datasets</p>
                  </div>
-                  <button 
-                    onClick={() => setShowAddModal(true)}
-                    className="px-6 py-4 bg-purple-500 text-white rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-purple-500/20 hover:scale-105 transition-all flex items-center gap-3"
-                  >
-                    <Plus size={18} /> Add Entry
-                  </button>
+                 <button className="px-6 py-4 bg-purple-500 text-white rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-purple-500/20 hover:scale-105 transition-all flex items-center gap-3">
+                   <Plus size={18} /> Add Entry
+                 </button>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -248,66 +230,6 @@ export default function UAssistAdminPage() {
           )}
         </AnimatePresence>
 
-        {/* ADD ENTRY MODAL */}
-        <AnimatePresence>
-          {showAddModal && (
-            <div className="fixed inset-0 z-[100] bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl flex items-center justify-center p-6">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-                className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 shadow-2xl rounded-[50px] overflow-hidden"
-              >
-                <div className="h-2 bg-purple-500" />
-                <div className="p-10 space-y-8">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-3xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Train UAssist</h3>
-                    <button onClick={() => setShowAddModal(false)} className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
-                      <Plus size={24} className="rotate-45" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-4">Question / Trigger</label>
-                      <input 
-                        type="text" 
-                        placeholder="What are the library hours?" 
-                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold outline-none focus:border-purple-500" 
-                        value={newEntry.q}
-                        onChange={(e) => setNewEntry({...newEntry, q: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-4">AI Response</label>
-                      <textarea 
-                        placeholder="The library is open 24/7 during exams..." 
-                        className="w-full h-32 px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-3xl text-slate-900 dark:text-white font-bold outline-none focus:border-purple-500 resize-none" 
-                        value={newEntry.a}
-                        onChange={(e) => setNewEntry({...newEntry, a: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-4">Tags (comma separated)</label>
-                      <input 
-                        type="text" 
-                        placeholder="library, schedule, help" 
-                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold outline-none focus:border-purple-500" 
-                        value={newEntry.tags}
-                        onChange={(e) => setNewEntry({...newEntry, tags: e.target.value})}
-                      />
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={addFAQ}
-                    className="w-full py-5 bg-purple-500 text-white rounded-[25px] font-black text-xs uppercase tracking-widest hover:bg-purple-600 shadow-xl shadow-purple-500/20 transition-all"
-                  >
-                    Sync to Knowledge Base
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
       </div>
     </AdminLayout>
   );

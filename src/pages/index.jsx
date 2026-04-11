@@ -116,7 +116,14 @@ export default function LandingPage() {
     };
   }, []);
 
-  // 4. AUTH INTERCEPTION
+  // 4. AUTH AUTO-REDIRECT
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push('/user/home');
+    }
+  }, [isLoggedIn, router]);
+
+  // 5. AUTH INTERCEPTION
   const handleModuleClick = (href) => {
     if (!isLoggedIn) {
       router.push(`/login?redirect=${href}`);
@@ -126,7 +133,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#020617] overflow-x-hidden">
+    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#020617]">
       <Navbar />
 
       {/* BACKGROUND EFFECTS */}
@@ -140,7 +147,7 @@ export default function LandingPage() {
       {/* 2. HERO SECTION */}
       <section className="w-full text-center pt-24 md:pt-40 pb-16 px-6 max-w-5xl mx-auto">
         <div className="transition-all duration-1000 ease-out transform">
-           <h1 className="font-syne font-black text-4xl sm:text-5xl md:text-7xl leading-[0.9] mb-8 tracking-tighter text-slate-900 dark:text-white">
+           <h1 className="font-syne font-black text-5xl md:text-7xl leading-[0.9] mb-8 tracking-tighter text-slate-900 dark:text-white">
              <span className="typewriter-cursor">{displayText}</span>
            </h1>
         </div>
@@ -191,7 +198,7 @@ export default function LandingPage() {
             key={mod.letter}
             onClick={() => handleModuleClick(mod.href)}
             className={`animate-on-scroll opacity-0 transition-all duration-1000 ease-out flex items-center group
-              ${i % 2 === 0 ? 'md:-translate-x-12' : 'md:translate-x-12'}
+              ${i % 2 === 0 ? '-translate-x-12' : 'translate-x-12'}
             `}
           >
             <div className={`glass-card w-full flex flex-col md:flex-row items-center p-8 md:p-12 rounded-[40px] cursor-pointer hover:shadow-2xl transition-all duration-500 border-l-[6px]`}
@@ -284,19 +291,129 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. FOOTER */}
-      <footer className="w-full py-16 px-6 border-t border-gray-100 dark:border-white/5 transition-colors">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div 
-            onClick={() => router.push('/')}
-            className="font-syne font-black text-2xl tracking-tighter text-[#1A56DB] dark:text-blue-400 cursor-pointer"
-          >
-            CAMPUS<span className="text-gray-900 dark:text-white">buddy</span>
-          </div>
-          <p className="text-sm text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest text-center">
-            Built at UITxKIIF Hackathon 2025 · TEAM PROCESS BUSTERS
+      {/* 6. ABOUT US (Team section) */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Eyebrow */}
+          <p className="text-center text-xs font-medium tracking-widest text-gray-400 uppercase mb-3">
+            The team behind it
           </p>
+
+          {/* Title */}
+          <h2 className="text-center font-syne font-extrabold text-4xl text-gray-900 dark:text-white mb-3">
+            Meet Process Busters
+          </h2>
+
+          {/* Subtitle */}
+          <p className="text-center text-sm text-gray-400 max-w-sm mx-auto leading-relaxed mb-14 font-medium">
+            A group of students who got tired of campus problems 
+            and decided to build the solution.
+          </p>
+
+          {/* Team grid */}
+          {(() => {
+            const members = [
+              { name: "Krish",   role: "Lead Developer & UI/UX Architect",  initials: "K", bg: "#E6F1FB", color: "#0C447C" },
+              { name: "Avinash", role: "Backend & Database Architect",      initials: "A", bg: "#FAEEDA", color: "#633806" },
+              { name: "Sangam",  role: "AI Integration & Logic Engineer", initials: "S", bg: "#E1F5EE", color: "#085041" },
+              { name: "Ayush",   role: "Cloud & Integrations Specialist",   initials: "A", bg: "#EEEDFE", color: "#3C3489" },
+              { name: "Mahek",   role: "Product Strategist & Pitch Lead",   initials: "M", bg: "#FCEBEB", color: "#791F1F" },
+              { name: "Palak",   role: "QA & Data Operations",              initials: "P", bg: "#F3E8FF", color: "#581C87" },
+            ]
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                {members.map((m, i) => (
+                  <div
+                    key={i}
+                    className="border border-gray-100 dark:border-white/5 rounded-2xl p-5 text-center 
+                               hover:-translate-y-1 transition-transform duration-200 bg-white dark:bg-slate-900 shadow-sm"
+                  >
+                    <div
+                      className="w-14 h-14 rounded-full flex items-center justify-center 
+                                 font-extrabold text-lg mx-auto mb-3"
+                      style={{ background: m.bg, color: m.color, fontFamily: 'Syne, sans-serif' }}
+                    >
+                      {m.initials}
+                    </div>
+                    <p className="text-sm font-black text-gray-900 dark:text-white mb-1">{m.name}</p>
+                    <p className="text-[10px] text-gray-400 leading-tight font-bold uppercase tracking-tight">{m.role}</p>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
         </div>
+      </section>
+
+      {/* thin divider between sections */}
+      <div className="h-px bg-gray-100 dark:bg-white/5 max-w-2xl mx-auto" />
+
+      {/* 7. CONTACT US */}
+      <section className="py-20 px-6 bg-gray-50/50 dark:bg-white/5">
+        <div className="max-w-lg mx-auto text-center">
+          {/* Eyebrow */}
+          <p className="text-xs font-medium tracking-widest text-gray-400 uppercase mb-3">
+            Get in touch
+          </p>
+
+          {/* Title */}
+          <h2 className="font-extrabold text-3xl text-gray-900 dark:text-white mb-3 font-syne tracking-tight">
+            Contact us
+          </h2>
+
+          {/* Subtitle */}
+          <p className="text-sm text-gray-400 max-w-xs mx-auto leading-relaxed mb-10 font-medium">
+            Have questions or feedback about CAMPUSbuddy? 
+            We would love to hear from you.
+          </p>
+
+          {/* Info cards grid */}
+          {(() => {
+            const contacts = [
+              { label: "Email",      value: "team@campusbuddy.in",      link: "mailto:team@campusbuddy.in" },
+              { label: "Hackathon",  value: "UITxKIIF 2025",            link: null },
+              { label: "GitHub",     value: "github.com/campusbuddy",   link: "https://github.com/campusbuddy" },
+              { label: "Team",       value: "Process Busters",          link: null },
+            ]
+            return (
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                {contacts.map((c, i) => (
+                  <div key={i} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-white/5 rounded-xl p-4 text-left shadow-sm">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                      {c.label}
+                    </p>
+                    {c.link ? (
+                      <a href={c.link}
+                         className="text-sm font-bold text-[#1A56DB] dark:text-blue-400 hover:underline">
+                        {c.value}
+                      </a>
+                    ) : (
+                      <p className="text-sm font-bold text-gray-800 dark:text-white">{c.value}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
+
+          {/* Live badge */}
+          <div className="inline-flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-100 dark:border-white/5 rounded-full px-5 py-2 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-xs font-bold text-gray-500 dark:text-slate-400">
+              Built live at UITxKIIF Hackathon 2025
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. NEW FOOTER */}
+      <footer className="flex items-center justify-between flex-wrap gap-3 px-10 py-5 border-t border-gray-100 dark:border-white/5 transition-colors">
+        <div className="font-extrabold text-base font-syne">
+          <span className="text-[#1A56DB] dark:text-blue-400">CAMPUS</span>buddy
+        </div>
+        <p className="text-xs text-gray-400 font-medium">
+          © 2025 Process Busters · UITxKIIF Hackathon
+        </p>
       </footer>
     </div>
   );

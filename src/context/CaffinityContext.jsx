@@ -1,82 +1,63 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { INITIAL_ORDERS, MENU_ITEMS } from '@/data/caffinityData';
+import { getCanteens, getMenu, placeCaffinityOrder } from '@/routes/user';
 
 const CaffinityContext = createContext();
 
 export const CaffinityProvider = ({ children }) => {
   const [selectedCanteen, setSelectedCanteen] = useState(null);
+  const [canteens, setCanteens] = useState([]);
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
   const [isCanteenSelecting, setIsCanteenSelecting] = useState(true);
-  const [menuItems, setMenuItems] = useState(MENU_ITEMS);
+  const [menuItems, setMenuItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Sync menu state to local storage optionally if we wanted persistance
+  // 1. Initial Data Fetch
   useEffect(() => {
-    const savedMenu = localStorage.getItem('caffinity_menu');
-    if (savedMenu) {
-      setMenuItems(JSON.parse(savedMenu));
-    } else {
-      localStorage.setItem('caffinity_menu', JSON.stringify(MENU_ITEMS));
-    }
-  }, []);
-
-  const toggleMenuItemAvailability = (id) => {
-    setMenuItems(prev => {
-      const updated = prev.map(i => i.id === id ? { ...i, isAvailable: !i.isAvailable } : i);
-      localStorage.setItem('caffinity_menu', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const addMenuItem = (item) => {
-    setMenuItems(prev => {
-      const newItem = { ...item, id: `m${Date.now()}` };
-      const updated = [newItem, ...prev];
-      localStorage.setItem('caffinity_menu', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const updateMenuItem = (id, updates) => {
-    setMenuItems(prev => {
-      const updated = prev.map(i => i.id === id ? { ...i, ...updates } : i);
-      localStorage.setItem('caffinity_menu', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const deleteMenuItem = (id) => {
-    setMenuItems(prev => {
-      const updated = prev.filter(i => i.id !== id);
-      localStorage.setItem('caffinity_menu', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    const savedCanteen = localStorage.getItem('selected_canteen');
-    const savedOrders = localStorage.getItem('caffinity_orders');
+    loadCanteens();
+    loadMenu();
     
+    // Auth persist check
+    const savedCanteen = localStorage.getItem('selected_canteen');
     if (savedCanteen) {
       setSelectedCanteen(JSON.parse(savedCanteen));
       setIsCanteenSelecting(false);
     }
-    
-    if (savedOrders) {
-      setOrders(JSON.parse(savedOrders));
-    } else {
-      setOrders(INITIAL_ORDERS);
-      localStorage.setItem('caffinity_orders', JSON.stringify(INITIAL_ORDERS));
-    }
   }, []);
 
-  // Sync orders to localStorage
-  useEffect(() => {
-    if (orders.length > 0) {
-      localStorage.setItem('caffinity_orders', JSON.stringify(orders));
+  const loadCanteens = async () => {
+    try {
+      const res = await getCanteens();
+      if (res.success) setCanteens(res.data);
+    } catch (e) { console.error('Error loading canteens'); }
+  };
+
+  const loadMenu = async (canteenId = null) => {
+    try {
+      setIsLoading(true);
+      const res = await getMenu(canteenId);
+      if (res.success) setMenuItems(res.data);
+    } catch (e) {
+      console.error('Error loading menu');
+    } finally {
+      setIsLoading(false);
     }
-  }, [orders]);
+  };
+
+  // Sync canteens view when selecting
+  useEffect(() => {
+    if (selectedCanteen) {
+      loadMenu(selectedCanteen.id);
+    }
+  }, [selectedCanteen]);
+
+  const toggleMenuItemAvailability = (id) => {
+    setMenuItems(prev => prev.map(i => i.id === id ? { ...i, isAvailable: !i.isAvailable } : i));
+  };
+
+  const deleteMenuItem = (id) => {
+    setMenuItems(prev => prev.filter(i => i.id !== id));
+  };
 
   const selectCanteen = (canteen) => {
     setSelectedCanteen(canteen);
@@ -113,29 +94,27 @@ export const CaffinityProvider = ({ children }) => {
 
   const clearCart = () => setCart([]);
 
-  const placeOrder = (scheduledTime, specialNote = '') => {
-    const cartTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const newOrder = {
-      id: `ORD-${Math.floor(Math.random() * 9000) + 1000}`,
-      studentName: 'Student User', // Should come from AuthContext in real app
+  const placeOrder = async (scheduledTime, paymentMethod, specialNote = '') => {
+    const orderData = {
+      items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
       canteenId: selectedCanteen?.id,
-      items: [...cart],
-      total: cartTotal,
-      status: 'Placed',
-      timestamp: new Date().toISOString(),
       scheduledTime: scheduledTime || 'As soon as possible',
-      paymentMethod: 'UPI',
-      paymentStatus: 'Paid',
+      paymentMethod: paymentMethod || 'UPI',
       specialNote: specialNote
     };
 
-    const updatedOrders = [newOrder, ...orders];
-    setOrders(updatedOrders);
-    clearCart();
-    
-    // Broadcast for vendor
-    window.dispatchEvent(new Event('storage'));
-    return newOrder;
+    try {
+      const res = await placeCaffinityOrder(orderData);
+      if (res.success) {
+        setOrders(prev => [res.data, ...prev]);
+        clearCart();
+        window.dispatchEvent(new Event('storage'));
+        return res.data;
+      }
+    } catch (e) {
+      console.error('Error placing order:', e);
+      throw e;
+    }
   };
 
   const updateOrderStatus = (orderId, newStatus) => {
@@ -194,8 +173,7 @@ export const CaffinityProvider = ({ children }) => {
     menuItems,
     toggleMenuItemAvailability,
     deleteMenuItem,
-    addMenuItem,
-    updateMenuItem
+    isLoading
   };
 
   return (

@@ -13,8 +13,9 @@ import {
 } from 'lucide-react';
 import { ROOMS } from '@/data/mapData';
 
-export default function BuildingBottomSheet({ building, onClose }) {
-  const [selectedFloor, setSelectedFloor] = useState(building.floors[0]);
+export default function BuildingBottomSheet({ building, activeFloor, onFloorChange, onClose }) {
+  const selectedFloor = activeFloor || building.floors[0];
+  const setSelectedFloor = onFloorChange;
   const buildingRooms = ROOMS[building.id] || [];
   const filteredRooms = buildingRooms.filter(r => r.floor === selectedFloor);
 

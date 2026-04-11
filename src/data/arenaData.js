@@ -146,15 +146,15 @@ export const FRIENDS = [
 ];
 
 export const SUGGESTED_TEAMMATES = [
-  { id: 's1', name: 'Siddharth R.', branch: 'CSE', semester: 4, skills: ['React', 'Python', 'UI/UX'], isAvailable: true, avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80', matchTag: 'Great match for CodePulse!' },
-  { id: 's2', name: 'Ishita K.', branch: 'Design', semester: 6, skills: ['Figma', 'Prototyping', 'UX'], isAvailable: false, avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80', matchTag: 'Design Lead Material' },
-  { id: 's3', name: 'Kabir M.', branch: 'Mechanical', semester: 2, skills: ['AutoCAD', 'C++', 'Arduino'], isAvailable: true, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80', matchTag: 'Hardware Enthusiast' },
-  { id: 's4', name: 'Zoya S.', branch: 'CSE', semester: 8, skills: ['AWS', 'Django', 'PostgreSQL'], isAvailable: true, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80', matchTag: 'Full Stack Expert' }
+  { id: 's1', name: 'Siddharth R.', branch: 'CSE', semester: 4, skills: ['React', 'Python', 'UI'], avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150&q=80', matchTag: 'Great match for CodePulse!' },
+  { id: 's2', name: 'Ishita K.', branch: 'Design', semester: 6, skills: ['Figma', 'Prototyping', 'UX'], avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80', matchTag: 'Design Lead Material' },
+  { id: 's3', name: 'Kabir M.', branch: 'Mechanical', semester: 2, skills: ['AutoCAD', 'C++', 'Arduino'], avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80', matchTag: 'Hardware Enthusiast' },
+  { id: 's4', name: 'Zoya S.', branch: 'CSE', semester: 8, skills: ['AWS', 'Django', 'PostgreSQL'], avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80', matchTag: 'Full Stack Expert' }
 ];
 
 export const NETWORK_ACTIVITY = [
   { id: 'act1', friendId: 'f3', type: 'registration', text: 'Rahul Shaurya registered for CodePulse Hackathon', eventId: 'EVT-0492', time: '2 mins ago', icon: '⚡' },
-  { id: 'act2', friendId: 'f12', type: 'registration', text: 'Ananya joined Design Thinking Workshop', eventId: 'EVT-0495', time: '15 mins ago', icon: '🎨' },
+  { id: 'act2', friendId: 'f12', type: 'registration', text: 'Ananya joined Design Thinking Workshop', eventId: 'EVT-0495', time: '15 mins ago', icon: '👥' },
   { id: 'act3', friendId: 'f4', type: 'location', text: 'Daksh is sharing location on Map', actionLabel: 'View Map →', module: 'Map', time: '1h ago', icon: '📍' }
 ];
 

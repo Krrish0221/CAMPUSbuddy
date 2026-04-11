@@ -40,34 +40,11 @@ export default function CaffinityVendorDashboard() {
     isCanteenSelecting,
     menuItems,
     toggleMenuItemAvailability,
-    deleteMenuItem,
-    addMenuItem,
-    updateMenuItem
+    deleteMenuItem
   } = useCaffinity();
 
   const [activeTab, setActiveTab] = useState('Live Orders');
   const [isAcceptingOrders, setIsAcceptingOrders] = useState(true);
-  const [showItemModal, setShowItemModal] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [newItem, setNewItem] = useState({ name: '', price: '', image: '', isAvailable: true });
-
-  const handleSaveItem = () => {
-    if (!newItem.name || !newItem.price) return;
-    if (editingItem) {
-      updateMenuItem(editingItem.id, newItem);
-    } else {
-      addMenuItem(newItem);
-    }
-    setShowItemModal(false);
-    setEditingItem(null);
-    setNewItem({ name: '', price: '', image: '', isAvailable: true });
-  };
-
-  const openEditModal = (item) => {
-    setEditingItem(item);
-    setNewItem({ name: item.name, price: item.price, image: item.image, isAvailable: item.isAvailable });
-    setShowItemModal(true);
-  };
 
   // Filter orders by selected canteen
   const canteenOrders = useMemo(() => {
@@ -218,24 +195,17 @@ export default function CaffinityVendorDashboard() {
                    <h3 className="text-3xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white">Menu Editor</h3>
                    <p className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Add or modify food items instantly</p>
                  </div>
-                  <button 
-                    onClick={() => {
-                      setEditingItem(null);
-                      setNewItem({ name: '', price: '', image: '', isAvailable: true });
-                      setShowItemModal(true);
-                    }}
-                    className="px-6 py-3 bg-amber-500 text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20 hover:scale-105 transition-transform flex items-center gap-2"
-                  >
-                    <Plus size={16} /> New Item
-                  </button>
+                 <button className="px-6 py-3 bg-amber-500 text-white rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20 hover:scale-105 transition-transform flex items-center gap-2">
+                   <Plus size={16} /> New Item
+                 </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {menuItems.map(item => (
                   <div key={item.id} className="bg-white dark:bg-slate-900 rounded-[40px] p-6 shadow-xl dark:shadow-2xl border border-slate-100 dark:border-white/5 space-y-6 group hover:border-amber-500/30 transition-colors">
                     <div className="flex gap-4">
-                      <div className="w-20 h-20 rounded-3xl overflow-hidden border-2 border-slate-100 dark:border-slate-800 shadow-md shrink-0 relative">
-                         <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      <div className="w-20 h-20 rounded-3xl overflow-hidden border-2 border-slate-100 dark:border-slate-800 shadow-md shrink-0">
+                         <img src={item.image} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                          <h4 className="font-bold text-slate-900 dark:text-white leading-tight truncate">{item.name}</h4>
@@ -245,20 +215,17 @@ export default function CaffinityVendorDashboard() {
                     <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950 rounded-[25px] border border-slate-200 dark:border-white/5">
                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Available</span>
                       <button 
-                         onClick={() => toggleMenuItemAvailability(item.id)}
+                         onClick={() => toggleItemAvailability(item.id)}
                          className={`w-12 h-6 rounded-full relative transition-all shadow-inner ${item.isAvailable ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-800'}`}
                       >
                          <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${item.isAvailable ? 'right-1' : 'left-1'}`} />
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-3 pt-2">
-                      <button 
-                        onClick={() => openEditModal(item)}
-                        className="py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-colors flex items-center justify-center gap-2"
-                      >
+                      <button className="py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-colors flex items-center justify-center gap-2">
                         <Edit2 size={12} /> Edit
                       </button>
-                      <button onClick={() => deleteMenuItem(item.id)} className="py-2.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center gap-2">
+                      <button onClick={() => deleteItem(item.id)} className="py-2.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center gap-2">
                         <Trash2 size={12} /> Delete
                       </button>
                     </div>
@@ -309,70 +276,6 @@ export default function CaffinityVendorDashboard() {
             </motion.div>
           )}
 
-        </AnimatePresence>
-
-        {/* ITEM MODAL */}
-        <AnimatePresence>
-          {showItemModal && (
-            <div className="fixed inset-0 z-[100] bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl flex items-center justify-center p-6">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-                className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 shadow-2xl rounded-[50px] overflow-hidden"
-              >
-                <div className="h-2 bg-amber-500" />
-                <div className="p-10 space-y-8">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-3xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">
-                      {editingItem ? 'Edit Item' : 'New Menu Item'}
-                    </h3>
-                    <button onClick={() => setShowItemModal(false)} className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
-                      <Plus size={24} className="rotate-45" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-4">Item Name</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Masala Dosa" 
-                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold outline-none focus:border-amber-500" 
-                        value={newItem.name}
-                        onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-4">Price (₹)</label>
-                      <input 
-                        type="number" 
-                        placeholder="80" 
-                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold outline-none focus:border-amber-500" 
-                        value={newItem.price}
-                        onChange={(e) => setNewItem({...newItem, price: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 pl-4">Image URL</label>
-                      <input 
-                        type="text" 
-                        placeholder="https://..." 
-                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold outline-none focus:border-amber-500" 
-                        value={newItem.image}
-                        onChange={(e) => setNewItem({...newItem, image: e.target.value})}
-                      />
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={handleSaveItem}
-                    className="w-full py-5 bg-amber-500 text-white rounded-[25px] font-black text-xs uppercase tracking-widest hover:bg-amber-600 shadow-xl shadow-amber-500/20 transition-all"
-                  >
-                    {editingItem ? 'Update Item' : 'Add to Menu'}
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          )}
         </AnimatePresence>
       </div>
     </AdminLayout>
